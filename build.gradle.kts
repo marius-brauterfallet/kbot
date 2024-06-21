@@ -3,6 +3,8 @@ val discord4j_version: String by project
 plugins {
     kotlin("jvm") version "2.0.0"
     application
+
+    id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
 group = "brauterfallet.no"
@@ -24,6 +26,12 @@ application {
 
 tasks.test {
     useJUnitPlatform()
+}
+
+tasks.withType<Jar> {
+    manifest {
+        attributes["Main-Class"] = "MainKt"
+    }
 }
 kotlin {
     jvmToolchain(21)
