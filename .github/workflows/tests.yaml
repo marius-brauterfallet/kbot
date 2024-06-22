@@ -1,0 +1,22 @@
+name: Kimmo tests
+run-name: Running tests on pull request
+on:
+  pull_request:
+    branches:
+      - main
+jobs:
+  test-gradle-project:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout project sources
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - run: chmod +x ./gradlew
+      - name: Run build
+        run: ./gradlew test
