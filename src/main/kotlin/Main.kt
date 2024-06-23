@@ -4,7 +4,7 @@ import discord4j.core.event.domain.message.ReactionAddEvent
 import discord4j.core.event.domain.message.ReactionRemoveEvent
 
 fun main() {
-    val token = System.getenv("kimmoToken")
+    val token = System.getenv("KIMMOBOT_TOKEN")
 
     val client = DiscordClient.create(token)
     val gateway = client.login().block()
