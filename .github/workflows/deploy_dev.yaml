@@ -1,0 +1,27 @@
+name: Deploy to dev
+run-name: Deploying solution to development environment
+on:
+  push:
+    branches:
+      - dev
+
+jobs:
+  deploy-to-dev:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout project sources
+        uses: actions/checkout@v4
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Azure Container Registry
+        run: |
+          echo ${{ secrets.AZURE_CONTAINER_REGISTRY_PASSWORD }} | docker login ${{ secrets.AZURE_CONTAINER_REGISTRY_NAME }} -u ${{ secrets.AZURE_CONTAINER_REGISTRY_USERNAME }} --password-stdin
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ${{ secrets.AZURE_CONTAINER_REGISTRY_NAME }}/kimmobot:dev
