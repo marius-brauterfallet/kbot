@@ -1,5 +1,5 @@
 # Use an official OpenJDK runtime as a parent image
-FROM eclipse-temurin:21-jdk-alpine
+FROM eclipse-temurin:21-jdk-alpine as builder
 
 # Set the working directory in the container
 WORKDIR /app
@@ -17,13 +17,22 @@ COPY gradlew gradle.properties ./
 RUN chmod +x ./gradlew
 
 # Download dependencies and prepare the build
-RUN ./gradlew build || return 0
+RUN ./gradlew build --stacktrace --no-daemon || return 0
 
 # Copy the source code
 COPY src src
 
 # Build the application
-RUN ./gradlew shadowJar
+RUN ./gradlew shadowJar --stacktrace --no-daemon
+
+# Use a smaller base image for the final image
+FROM eclipse-temurin:21-jre-alpine as runner
+
+# Set the working directory in the container
+WORKDIR /app
+
+# Copy the jar file from the builder stage
+COPY --from=builder /app/build/libs/KimmoBot-0.0.1-all.jar /app/KimmoBot-0.0.1-all.jar
 
 # Set the default command to run the app
-CMD ["java", "-jar", "build/libs/KimmoBot-0.0.1-all.jar"]
+CMD ["java", "-jar", "/app/KimmoBot-0.0.1-all.jar"]
