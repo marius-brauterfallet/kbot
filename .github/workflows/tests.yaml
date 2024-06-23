@@ -2,6 +2,7 @@ name: Kimmo tests
 run-name: Running tests on pull request
 on:
   pull_request:
+    types: [opened, edited]
     branches:
       - main
 jobs:
