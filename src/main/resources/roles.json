@@ -1,0 +1,28 @@
+{
+  "roles": [
+    {
+      "emoji": "💻",
+      "name": "Developer"
+    },
+    {
+      "emoji": "🧠",
+      "name": "Backend"
+    },
+    {
+      "emoji": "🎨",
+      "name": "Design"
+    },
+    {
+      "emoji": "🌐",
+      "name": "Frontend"
+    },
+    {
+      "emoji": "🔍",
+      "name": "Testing"
+    },
+    {
+      "emoji": "👑",
+      "name": "Lead"
+    }
+  ]
+}
