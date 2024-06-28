@@ -43,3 +43,4 @@ bin/
 
 ### Secret environment variables ###
 secrets.env
+application.*.conf
