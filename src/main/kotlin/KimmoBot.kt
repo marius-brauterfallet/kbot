@@ -29,9 +29,8 @@ fun registerCommands() {
 
         val content = event.message.content
 
-        commands.find { command -> content.trim() == "!${command.name}" || content.startsWith("!${command.name} ") }
+        commands
+            .find { command -> content.trim() == "!${command.name}" || content.startsWith("!${command.name} ") }
             ?.execute(event)
-
-        Mono.empty<Unit>()
     }.subscribe()
 }
