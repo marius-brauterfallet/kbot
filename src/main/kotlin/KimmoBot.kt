@@ -1,64 +1,35 @@
 import com.typesafe.config.Config
 import commands.Command
 import commands.PingCommand
+import discord4j.common.util.Snowflake
 import discord4j.core.DiscordClient
 import discord4j.core.GatewayDiscordClient
 import discord4j.core.event.domain.message.MessageCreateEvent
-import discord4j.core.event.domain.message.ReactionAddEvent
-import discord4j.core.event.domain.message.ReactionRemoveEvent
+import discord4j.core.`object`.entity.Guild
 import reactor.core.publisher.Mono
-import kotlin.jvm.optionals.getOrElse
 import kotlin.jvm.optionals.getOrNull
 
 fun kimmoBotInit(config: Config) {
     val client = DiscordClient.create(config.getString("discord.token")).login().block()
         ?: throw IllegalStateException("Something went wrong when initializing the Discord client")
 
+    val guildId = Snowflake.of(config.getLong("discord.guildId"))
+    val guild = client.getGuildById(guildId).block()
+        ?: throw Exception("Something went wrong when retrieving the guild")
+
     registerCommands(client)
-    registerListeners(client, config)
+    registerListeners(client, config, guild)
 
     client.onDisconnect().block()
 }
 
-fun registerListeners(client: GatewayDiscordClient, config: Config) {
+
+fun registerListeners(client: GatewayDiscordClient, config: Config, guild: Guild) {
     val messageId = config.getLong("discord.rolesMessage.messageId")
 
-    roleReactionHandler(client, messageId)
+    roleReactionHandler(client, messageId, guild)
 }
 
-fun roleReactionHandler(client: GatewayDiscordClient, roleMessageId: Long) {
-    client.on(ReactionAddEvent::class.java) { event ->
-        if (event.messageId.asLong() != roleMessageId) return@on Mono.empty()
-
-        val emoji = event.emoji.asUnicodeEmoji().getOrElse { return@on Mono.empty() }.raw
-
-        val (roleName, _) = Resources.userRoles.find { role -> role.emoji == emoji } ?: return@on Mono.empty()
-
-        val member = event.member.getOrElse { return@on Mono.empty() }
-
-        event.guild
-            .flatMap { guild -> guild.roles.filter { role -> role.name == roleName }.singleOrEmpty() }
-            .flatMap { role -> member.addRole(role.id) }
-            .then(Mono.empty<Unit>())
-    }.subscribe()
-
-    client.on(ReactionRemoveEvent::class.java) { event ->
-        if (event.messageId.asLong() != roleMessageId) return@on Mono.empty()
-
-        val emoji = event.emoji.asUnicodeEmoji().getOrElse { return@on Mono.empty() }.raw
-
-        val (roleName, _) = Resources.userRoles.find { role -> role.emoji == emoji } ?: return@on Mono.empty()
-
-        val guildId = event.guildId.getOrElse { return@on Mono.empty() }
-
-        val member = event.user.flatMap { it.asMember(guildId) }
-
-        event.guild
-            .flatMap { guild -> guild.roles.filter { role -> role.name == roleName }.singleOrEmpty() }
-            .flatMap { role -> member.flatMap { it.removeRole(role.id) } }
-            .then(Mono.empty<Unit>())
-    }.subscribe()
-}
 
 fun registerCommands(client: GatewayDiscordClient) {
     val commands: List<Command> = listOf(PingCommand)
