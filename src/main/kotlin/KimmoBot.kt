@@ -1,4 +1,3 @@
-import com.typesafe.config.Config
 import commands.Command
 import commands.PingCommand
 import discord4j.common.util.Snowflake
@@ -9,23 +8,23 @@ import discord4j.core.`object`.entity.Guild
 import reactor.core.publisher.Mono
 import kotlin.jvm.optionals.getOrNull
 
-fun kimmoBotInit(config: Config) {
-    val client = DiscordClient.create(config.getString("discord.token")).login().block()
+fun kimmoBotInit() {
+    val client = DiscordClient.create(KimmoConfig.config.getString("discord.token")).login().block()
         ?: throw IllegalStateException("Something went wrong when initializing the Discord client")
 
-    val guildId = Snowflake.of(config.getLong("discord.guildId"))
+    val guildId = Snowflake.of(KimmoConfig.config.getLong("discord.guildId"))
     val guild = client.getGuildById(guildId).block()
         ?: throw Exception("Something went wrong when retrieving the guild")
 
     registerCommands(client)
-    registerListeners(client, config, guild)
+    registerListeners(client, guild)
 
     client.onDisconnect().block()
 }
 
 
-fun registerListeners(client: GatewayDiscordClient, config: Config, guild: Guild) {
-    val messageId = config.getLong("discord.rolesMessage.messageId")
+fun registerListeners(client: GatewayDiscordClient, guild: Guild) {
+    val messageId = KimmoConfig.config.getLong("discord.rolesMessage.messageId")
 
     roleReactionHandler(client, messageId, guild)
 }
