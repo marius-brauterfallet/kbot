@@ -4,8 +4,9 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class UserRole(
-    val name: String,
-    val emoji: String
+    val emoji: String,
+    val id: Long,
+    val name: String
 )
 
 @Serializable

@@ -2,27 +2,33 @@
   "roles": [
     {
       "emoji": "💻",
-      "name": "Developer"
+      "name": "Developer",
+      "id": 1256277773354532934
     },
     {
       "emoji": "🧠",
-      "name": "Backend"
+      "name": "Backend",
+      "id": 1256253049840865413
     },
     {
       "emoji": "🎨",
-      "name": "Design"
+      "name": "Design",
+      "id": 1256277815779921930
     },
     {
       "emoji": "🌐",
-      "name": "Frontend"
+      "name": "Frontend",
+      "id": 1256277839720742984
     },
     {
       "emoji": "🔍",
-      "name": "Testing"
+      "name": "Testing",
+      "id": 1256277874584064151
     },
     {
       "emoji": "👑",
-      "name": "Lead"
+      "name": "Lead",
+      "id": 1256277901318422569
     }
   ]
 }

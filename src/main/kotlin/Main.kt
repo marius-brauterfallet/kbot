@@ -1,3 +1,10 @@
+import constants.client
+
 fun main() {
-    kimmoBotInit()
+    updateUserRoles().subscribe()
+
+    registerCommands()
+    registerListeners()
+
+    client.onDisconnect().block()
 }
