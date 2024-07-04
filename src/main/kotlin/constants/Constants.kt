@@ -6,6 +6,7 @@ import discord4j.core.DiscordClientBuilder
 import discord4j.core.GatewayDiscordClient
 import discord4j.gateway.intent.Intent
 import discord4j.gateway.intent.IntentSet
+import java.util.*
 
 private val environment = System.getenv("ENV") ?: "default"
 
@@ -13,6 +14,13 @@ val config = when (environment) {
     "dev" -> ConfigFactory.parseResources("application.dev.conf").withFallback(ConfigFactory.load())
     else -> ConfigFactory.load()
 } ?: throw IllegalStateException("Could not load bot configuration")
+
+val properties = Properties().apply {
+    load(Thread.currentThread().contextClassLoader.getResourceAsStream("application.properties"))
+}
+
+val appVersion = properties.getProperty("version")
+    ?: IllegalStateException("Something went wrong when retrieving properties")
 
 val client = initializeKbot()
 

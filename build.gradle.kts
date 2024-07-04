@@ -35,6 +35,12 @@ tasks.test {
     useJUnitPlatform()
 }
 
+tasks.processResources {
+    filesMatching("application.properties") {
+        expand("version" to version)
+    }
+}
+
 tasks.withType<Jar> {
     manifest {
         attributes["Main-Class"] = "MainKt"
