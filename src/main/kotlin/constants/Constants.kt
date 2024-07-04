@@ -37,7 +37,7 @@ fun initializeKbot(): GatewayDiscordClient {
     return DiscordClientBuilder.create(discordToken)
         .build()
         .gateway()
-        .setEnabledIntents(IntentSet.of(Intent.GUILD_MEMBERS))
+        .setEnabledIntents(IntentSet.all())
         .login()
         .block()
         ?: throw IllegalStateException("Something went wrong when initializing the Discord bot")
