@@ -1,3 +1,5 @@
+val app_version: String by project
+
 val kotlinx_coroutines_version: String by project
 val kotlinx_serialization_version: String by project
 val discord4j_version: String by project
@@ -11,7 +13,7 @@ plugins {
 }
 
 group = "brauterfallet.no"
-version = "0.0.1"
+version = app_version
 
 repositories {
     mavenCentral()
