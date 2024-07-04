@@ -6,6 +6,7 @@ import discord4j.core.DiscordClientBuilder
 import discord4j.core.GatewayDiscordClient
 import discord4j.gateway.intent.Intent
 import discord4j.gateway.intent.IntentSet
+import org.slf4j.LoggerFactory
 import java.util.*
 
 private val environment = System.getenv("ENV") ?: "default"
@@ -18,6 +19,8 @@ val config = when (environment) {
 val properties = Properties().apply {
     load(Thread.currentThread().contextClassLoader.getResourceAsStream("application.properties"))
 }
+
+val logger = LoggerFactory.getLogger("kbot") ?: throw Exception("Something went wrong initializing the Logback logger")
 
 val appVersion = properties.getProperty("version")
     ?: IllegalStateException("Something went wrong when retrieving app properties")

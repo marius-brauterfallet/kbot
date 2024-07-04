@@ -3,6 +3,8 @@ val app_version: String by project
 val kotlinx_coroutines_version: String by project
 val kotlinx_serialization_version: String by project
 val discord4j_version: String by project
+val logback_version: String by project
+
 
 plugins {
     kotlin("jvm") version "2.0.0"
@@ -27,6 +29,7 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlinx_serialization_version")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-hocon:$kotlinx_serialization_version")
     implementation("com.discord4j:discord4j-core:$discord4j_version")
+    implementation("ch.qos.logback:logback-classic:$logback_version")
 }
 
 application {
