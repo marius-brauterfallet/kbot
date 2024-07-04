@@ -32,7 +32,7 @@ FROM eclipse-temurin:21-jre-alpine as runner
 WORKDIR /app
 
 # Copy the jar file from the builder stage
-COPY --from=builder /app/build/libs/KimmoBot-0.0.1-all.jar /app/KimmoBot-0.0.1-all.jar
+COPY --from=builder /app/build/libs/kbot-0.0.1-all.jar /app/kbot-0.0.1-all.jar
 
 # Set the default command to run the app
-CMD ["java", "-jar", "/app/KimmoBot-0.0.1-all.jar"]
+CMD ["java", "-jar", "/app/kbot-0.0.1-all.jar"]

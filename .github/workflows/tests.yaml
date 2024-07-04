@@ -1,4 +1,4 @@
-name: Kimmo tests
+name: kbot tests
 run-name: Running tests on pull request
 on:
   pull_request:

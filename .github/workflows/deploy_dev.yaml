@@ -24,4 +24,4 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ secrets.AZURE_CONTAINER_REGISTRY_NAME }}/kimmobot:dev
+          tags: ${{ secrets.AZURE_CONTAINER_REGISTRY_NAME }}/kbot:dev

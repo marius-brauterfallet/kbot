@@ -14,12 +14,12 @@ val config = when (environment) {
     else -> ConfigFactory.load()
 } ?: throw IllegalStateException("Could not load bot configuration")
 
-val client = initializeKimmoBot()
+val client = initializeKbot()
 
 val guild = client.getGuildById(Snowflake.of(config.getLong("discord.guildId"))).block()
     ?: throw Exception("Something went wrong when retrieving the guild")
 
-fun initializeKimmoBot(): GatewayDiscordClient {
+fun initializeKbot(): GatewayDiscordClient {
     return DiscordClientBuilder.create(config.getString("discord.token"))
         .build()
         .gateway()
