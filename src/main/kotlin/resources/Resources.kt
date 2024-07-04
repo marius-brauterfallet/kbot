@@ -6,7 +6,7 @@ import kotlinx.serialization.json.decodeFromStream
 import model.UserRoles
 
 private val rolesResource = {}.javaClass.getResourceAsStream("/roles.json")
-    ?: throw Exception("Could not get resource 'roles.json'")
+    ?: throw IllegalStateException("Could not get resource 'roles.json'")
 
 @OptIn(ExperimentalSerializationApi::class)
 val guildUserRoles = Json.decodeFromStream<UserRoles>(rolesResource).roles

@@ -20,15 +20,18 @@ val properties = Properties().apply {
 }
 
 val appVersion = properties.getProperty("version")
-    ?: IllegalStateException("Something went wrong when retrieving properties")
+    ?: IllegalStateException("Something went wrong when retrieving app properties")
 
 val client = initializeKbot()
 
 val guild = client.getGuildById(Snowflake.of(config.getLong("discord.guildId"))).block()
-    ?: throw Exception("Something went wrong when retrieving the guild")
+    ?: throw IllegalStateException("Something went wrong when retrieving the guild id. Environment variable GUILD_ID might be missing")
 
 fun initializeKbot(): GatewayDiscordClient {
-    return DiscordClientBuilder.create(config.getString("discord.token"))
+    val discordToken = config.getString("discord.token")
+        ?: throw IllegalStateException("Something went wrong when retrieving the Discord token. Environment variable DISCORD_TOKEN might be missing")
+
+    return DiscordClientBuilder.create(discordToken)
         .build()
         .gateway()
         .setEnabledIntents(IntentSet.of(Intent.GUILD_MEMBERS))
@@ -38,6 +41,6 @@ fun initializeKbot(): GatewayDiscordClient {
 }
 
 val rolesMessageChannelId = Snowflake.of(config.getLong("discord.rolesMessage.channelId"))
-    ?: throw IllegalStateException("Missing config field discord.rolesMessage.channelId")
+    ?: throw IllegalStateException("Something went wrong when retrieving the role selection channel id. Environment variable ROLES_MESSAGE_CHANNEL_ID might be missing")
 val rolesMessageId = Snowflake.of(config.getLong("discord.rolesMessage.messageId"))
-    ?: throw IllegalStateException("Missing config field discord.rolesMessage.messageId")
+    ?: throw IllegalStateException("Somethign went wrong when retrieving the role selection message id. Environment variable ROLES_MESSAGE_ID might be missing")
