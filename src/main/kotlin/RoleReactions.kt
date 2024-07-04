@@ -44,31 +44,17 @@ fun handleEmojiRoleChange(member: Member, emoji: ReactionEmoji, addRole: Boolean
 
 
 fun updateUserRoles(): Flux<Void> {
-    val guildMembers = guild.members
+    return guild.members.collectList().flatMapMany { guildMembers ->
+        client.getMessageById(rolesMessageChannelId, rolesMessageId).flatMapMany { rolesMessage ->
+            Flux.concat(guildUserRoles.map { userRole ->
+                val roleId = Snowflake.of(userRole.id)
 
-    val rolesMessage = client.getMessageById(rolesMessageChannelId, rolesMessageId)
-
-    return rolesMessage.flatMapMany { message ->
-        Flux.fromIterable(guildUserRoles).flatMap { userRole ->
-            val roleSnowflake = Snowflake.of(userRole.id)
-            val emojiReaction = ReactionEmoji.unicode(userRole.emoji)
-            val messageReactors = message.getReactors(emojiReaction)
-
-            val addRolesFlux = messageReactors
-                .filterWhen { reactorUser -> guildMembers.any { member -> member.id == reactorUser.id } }
-                .flatMap { reactorUser ->
-                    guild.getMemberById(reactorUser.id).flatMap { member -> member.addRole(roleSnowflake) }
+                rolesMessage.getReactors(ReactionEmoji.unicode(userRole.emoji)).collectList().flatMapMany { reactors ->
+                    Flux.fromIterable(guildMembers).flatMap { member ->
+                        if (reactors.any { it.id == member.id }) member.addRole(roleId) else member.removeRole(roleId)
+                    }
                 }
-
-            val removeRolesFlux = guildMembers
-                .filterWhen { member ->
-                    message.getReactors(emojiReaction)
-                        .any { reactorUser -> reactorUser.id == member.id }
-                        .map { hasReacted -> !hasReacted }
-                }
-                .flatMap { member -> member.removeRole(roleSnowflake) }
-
-            addRolesFlux.mergeWith(removeRolesFlux)
+            })
         }
     }
 }
