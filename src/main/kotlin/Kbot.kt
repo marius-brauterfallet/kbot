@@ -26,6 +26,7 @@ fun initializeKbot(): GatewayDiscordClient {
 
 
 fun registerListeners() {
+    roleChangeHandler()
     roleReactionHandler()
 }
 

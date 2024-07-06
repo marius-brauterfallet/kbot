@@ -1,4 +1,5 @@
 import constants.client
+import constants.logger
 import constants.rolesMessageChannelId
 import constants.rolesMessageId
 import discord4j.common.util.Snowflake
@@ -13,6 +14,8 @@ object GuildRoles {
         get() = _roles
 
     fun updateRoles(): Mono<Unit> {
+        logger.info("Updating guild role list...")
+
         return client.getMessageById(rolesMessageChannelId, rolesMessageId).map { rolesMessage ->
             _roles = rolesMessage.content.lines().mapNotNull { line ->
                 val matcher = Pattern

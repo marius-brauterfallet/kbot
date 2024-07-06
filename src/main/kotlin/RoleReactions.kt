@@ -1,8 +1,4 @@
-import constants.client
-import constants.guild
-import constants.rolesMessageChannelId
-import constants.rolesMessageId
-import discord4j.common.util.Snowflake
+import constants.*
 import discord4j.core.event.domain.message.ReactionAddEvent
 import discord4j.core.event.domain.message.ReactionRemoveEvent
 import discord4j.core.`object`.entity.Member
@@ -43,6 +39,8 @@ fun handleEmojiRoleChange(member: Member, emoji: ReactionEmoji, addRole: Boolean
 
 
 fun updateUserRoles(): Flux<Void> {
+    logger.info("Updating user roles...")
+
     return guild.members.collectList().flatMapMany { guildMembers ->
         client.getMessageById(rolesMessageChannelId, rolesMessageId).flatMapMany { rolesMessage ->
             Flux.concat(GuildRoles.roles.map { userRole ->
@@ -56,5 +54,5 @@ fun updateUserRoles(): Flux<Void> {
                 }
             })
         }
-    }
+    }.doOnComplete { logger.info("User roles update completed.") }
 }
