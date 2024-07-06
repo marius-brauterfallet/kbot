@@ -1,15 +1,8 @@
 package model
 
-import kotlinx.serialization.Serializable
+import discord4j.common.util.Snowflake
 
-@Serializable
 data class UserRole(
     val emoji: String,
-    val id: Long,
-    val name: String
-)
-
-@Serializable
-data class UserRoles(
-    val roles: List<UserRole>
+    val id: Snowflake,
 )

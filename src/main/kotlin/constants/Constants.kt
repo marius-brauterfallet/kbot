@@ -2,10 +2,7 @@ package constants
 
 import com.typesafe.config.ConfigFactory
 import discord4j.common.util.Snowflake
-import discord4j.core.DiscordClientBuilder
-import discord4j.core.GatewayDiscordClient
-import discord4j.gateway.intent.Intent
-import discord4j.gateway.intent.IntentSet
+import initializeKbot
 import org.slf4j.LoggerFactory
 import java.util.*
 
@@ -29,19 +26,6 @@ val client = initializeKbot()
 
 val guild = client.getGuildById(Snowflake.of(config.getLong("discord.guildId"))).block()
     ?: throw IllegalStateException("Something went wrong when retrieving the guild id. Environment variable GUILD_ID might be missing")
-
-fun initializeKbot(): GatewayDiscordClient {
-    val discordToken = config.getString("discord.token")
-        ?: throw IllegalStateException("Something went wrong when retrieving the Discord token. Environment variable DISCORD_TOKEN might be missing")
-
-    return DiscordClientBuilder.create(discordToken)
-        .build()
-        .gateway()
-        .setEnabledIntents(IntentSet.all())
-        .login()
-        .block()
-        ?: throw IllegalStateException("Something went wrong when initializing the Discord bot")
-}
 
 val rolesMessageChannelId = Snowflake.of(config.getLong("discord.rolesMessage.channelId"))
     ?: throw IllegalStateException("Something went wrong when retrieving the role selection channel id. Environment variable ROLES_MESSAGE_CHANNEL_ID might be missing")

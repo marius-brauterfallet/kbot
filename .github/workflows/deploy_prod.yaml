@@ -3,6 +3,8 @@ run-name: Pushing Docker image to container registry and deploying to prod
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - 'README.md'
 
 jobs:
   deploy-image-prod:
