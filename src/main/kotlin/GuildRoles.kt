@@ -30,6 +30,5 @@ object GuildRoles {
                 UserRole(emoji, id)
             }
         }
-
     }
 }
