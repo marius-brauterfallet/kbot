@@ -5,9 +5,9 @@ import constants.logger
 fun main() {
     logger.info("Launching kbot version $appVersion")
 
-    GuildRoles.updateRoles().subscribe {
-        updateUserRoles().subscribe()
-    }
+    GuildRoles.updateRoles()
+        .flatMapMany { updateUserRoles() }
+        .subscribe()
 
     registerCommands()
     registerListeners()
