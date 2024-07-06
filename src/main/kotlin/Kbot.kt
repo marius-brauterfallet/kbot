@@ -1,4 +1,5 @@
 import commands.Command
+import commands.InfoCommand
 import commands.PingCommand
 import constants.client
 import constants.config
@@ -30,7 +31,7 @@ fun registerListeners() {
 
 
 fun registerCommands() {
-    val commands: List<Command> = listOf(PingCommand)
+    val commands: List<Command> = listOf(PingCommand, InfoCommand)
 
     client.on(MessageCreateEvent::class.java) { event ->
         if (event.message.author.getOrNull()?.isBot == true) return@on Mono.empty()
@@ -39,6 +40,6 @@ fun registerCommands() {
 
         commands
             .find { command -> content.trim() == "!${command.name}" || content.startsWith("!${command.name} ") }
-            ?.execute(event)
+            ?.execute(event) ?: Mono.empty()
     }.subscribe()
 }
