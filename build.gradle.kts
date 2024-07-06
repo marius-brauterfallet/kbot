@@ -40,6 +40,21 @@ tasks.test {
     useJUnitPlatform()
 }
 
+tasks.register("deleteApplicationProperties") {
+    doLast {
+        val propertiesFile = file("build/resources/main/application.properties")
+        if (propertiesFile.exists()) {
+            delete(propertiesFile)
+
+            println("Deleted application.properties file")
+        }
+    }
+}
+
+tasks.named("processResources") {
+    dependsOn("deleteApplicationProperties")
+}
+
 tasks.processResources {
     filesMatching("application.properties") {
         expand("version" to version)
