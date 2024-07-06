@@ -1,11 +1,11 @@
-name: Push image and deploy to prod
-run-name: Pushing Docker image to container registry and deploying to prod
+name: Push image and deploy to test
+run-name: Pushing Docker image to container registry and deploying to test
 on:
   push:
-    branches: [main]
+    branches: [test]
 
 jobs:
-  deploy-image-prod:
+  deploy-image-test:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout project sources
@@ -29,7 +29,7 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ secrets.DOCKER_REGISTRY_NAME }}/kbot:${{ env.APP_VERSION }},${{ secrets.DOCKER_REGISTRY_NAME }}/kbot:latest
+          tags: ${{ secrets.DOCKER_REGISTRY_NAME }}/kbot:${{ env.APP_VERSION }}
 
       - name: Setup SSH key
         run: |
@@ -40,7 +40,7 @@ jobs:
 
       - name: Run deploy script
         run: |
-          ssh kbot@${{ secrets.SSH_HOST }} "./deploy.sh ${{ env.APP_VERSION }} ${{ secrets.DOCKER_USERNAME }} ${{ secrets.DOCKER_TOKEN }} kbot_prod ${{ secrets.DISCORD_TOKEN_PROD }} ${{ secrets.GUILD_ID_PROD }} ${{ secrets.ROLES_MESSAGE_CHANNEL_ID_PROD }} ${{ secrets.ROLES_MESSAGE_ID_PROD }}"
+          ssh kbot@${{ secrets.SSH_HOST }} "./deploy.sh ${{ env.APP_VERSION }} ${{ secrets.DOCKER_USERNAME }} ${{ secrets.DOCKER_TOKEN }} kbot_test ${{ secrets.DISCORD_TOKEN_TEST }} ${{ secrets.GUILD_ID_TEST }} ${{ secrets.ROLES_MESSAGE_CHANNEL_ID_TEST }} ${{ secrets.ROLES_MESSAGE_ID_TEST }}"
 
       - name: SSH cleanup
         run: |

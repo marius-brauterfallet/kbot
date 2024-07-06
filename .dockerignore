@@ -3,5 +3,6 @@
 .github
 .idea
 build
+logs
 *.log
 secrets.env
