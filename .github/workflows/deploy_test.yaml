@@ -3,6 +3,8 @@ run-name: Pushing Docker image to container registry and deploying to test
 on:
   push:
     branches: [test]
+    paths-ignore:
+      - 'README.md'
 
 jobs:
   deploy-image-test:
