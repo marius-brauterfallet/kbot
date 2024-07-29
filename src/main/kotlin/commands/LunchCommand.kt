@@ -6,10 +6,9 @@ import reactor.core.publisher.Mono
 import java.util.regex.Pattern
 
 object LunchCommand : Command {
-    override val name = "lunch"
-
     private const val MENU_URL =
         "https://widget.inisign.com/Widget/Customers/Customer.aspx?token=c5a641de-e74e-48eb-be4e-d847f261ec11"
+    override val commands = listOf("lunch", "lunsj")
 
     override fun execute(event: MessageCreateEvent): Mono<Unit> {
         val menus = getMenus().getOrElse {
