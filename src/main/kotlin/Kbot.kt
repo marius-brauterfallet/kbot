@@ -35,6 +35,20 @@ fun registerListeners() {
 fun registerCommands() {
     val commands: List<Command> = listOf(PingCommand, InfoCommand, LunchCommand)
 
+    // Ensure that command names are not used multiple times
+    commands.flatMap { it.commands }
+        .let { allCommands ->
+            val duplicateCommands = allCommands
+                .toSet()
+                .map { command -> command to allCommands.count { it == command } }
+                .filter { it.second != 1 }
+                .map { it.first }
+
+            require(duplicateCommands.isEmpty()) {
+                "The following commands are used multiple times: ${duplicateCommands.joinToString(", ") { "'$it'" }}"
+            }
+        }
+
     client.on(MessageCreateEvent::class.java) { event ->
         if (event.message.author.getOrNull()?.isBot == true) return@on Mono.empty()
 
