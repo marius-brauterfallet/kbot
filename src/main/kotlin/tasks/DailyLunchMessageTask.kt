@@ -1,11 +1,11 @@
 package tasks
 
-import commands.LunchCommand.getMenus
 import constants.applicationScope
 import constants.client
 import constants.dailyUpdatesChannelId
 import constants.logger
 import kotlinx.datetime.LocalTime
+import services.LunchService.getMenus
 
 fun registerDailyLunchMessage() {
     scheduleWeekdayTask(applicationScope, LocalTime(9, 0)) {
