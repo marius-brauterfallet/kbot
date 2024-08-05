@@ -1,5 +1,6 @@
 package commands
 
+import constants.logger
 import discord4j.core.event.domain.message.MessageCreateEvent
 import org.jsoup.Jsoup
 import reactor.core.publisher.Mono
@@ -53,9 +54,11 @@ object LunchCommand : Command {
 
         val menuDiv = document
             .select("h1")
-            .find { it.text().lowercase().contains("todays lunch") }
+            .also(::println)
+            .find { it.text().lowercase().contains(Regex("today'?s lunch")) }
             ?.parent()
-            ?: return Result.failure(Exception("Could not find lunch container"))
+            ?: return Result.failure<String>(Exception("Could not find lunch container"))
+                .also { logger.error(it.exceptionOrNull()?.message) }
 
         val menu = menuDiv.select("h2").joinToString("\n") { it.text() }
 
