@@ -1,10 +1,9 @@
 import commands.Command
 import commands.InfoCommand
 import commands.LunchCommand
+import commands.LunchCommand.getMenus
 import commands.PingCommand
-import constants.applicationScope
-import constants.client
-import constants.config
+import constants.*
 import discord4j.core.DiscordClientBuilder
 import discord4j.core.GatewayDiscordClient
 import discord4j.core.event.domain.message.MessageCreateEvent
@@ -70,8 +69,19 @@ fun registerCommands() {
 }
 
 fun registerScheduledTasks() {
-    scheduleDailyTask(applicationScope, LocalTime(0, 9)) {
-        // TODO: Post lunch menu to specified channel
+    registerDailyLunchMessage()
+}
+
+fun registerDailyLunchMessage() {
+    scheduleWeekdayTask(applicationScope, LocalTime(9, 0)) {
+        val menusMessage = getMenus().getOrElse { exception ->
+            "Could not retrieve today's lunch menus: ${exception.message}".also(logger::error)
+        }
+
+        client.getChannelById(dailyUpdatesChannelId)
+            .flatMap { channel -> channel.restChannel.createMessage(menusMessage) }
+            .doOnError { logger.error("Failed to send message: ${it.message}") }
+            .block()
     }
 }
 
@@ -86,10 +96,20 @@ fun scheduleDailyTask(scope: CoroutineScope, time: LocalTime, task: () -> Unit) 
     }
 }
 
+fun scheduleWeekdayTask(scope: CoroutineScope, time: LocalTime, task: () -> Unit) {
+    scheduleDailyTask(scope, time) {
+        if (Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).dayOfWeek in listOf(
+                DayOfWeek.SATURDAY,
+                java.time.DayOfWeek.SUNDAY
+            )
+        ) return@scheduleDailyTask
+
+        task.invoke()
+    }
+}
+
 fun scheduleTask(scope: CoroutineScope, nextRun: Instant, interval: Duration, task: () -> Unit) {
     val firstDelay = nextRun - Clock.System.now()
-
-    println("${firstDelay.inWholeSeconds} seconds delay")
 
     scope.launch {
         delay(firstDelay)
