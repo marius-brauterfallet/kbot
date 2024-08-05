@@ -5,6 +5,7 @@ import reactor.core.publisher.Mono
 
 object InfoCommand : Command {
     override val commands = listOf("info")
+    override val description = "Responds with info about the bot"
 
     override fun execute(event: MessageCreateEvent): Mono<Unit> {
         return event.message.channel.flatMap { channel ->
