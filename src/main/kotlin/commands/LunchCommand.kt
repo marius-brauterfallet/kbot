@@ -9,6 +9,7 @@ object LunchCommand : Command {
     private const val MENU_URL =
         "https://widget.inisign.com/Widget/Customers/Customer.aspx?token=c5a641de-e74e-48eb-be4e-d847f261ec11"
     override val commands = listOf("lunch", "lunsj")
+    override val description = "Responds with today's lunch menus"
 
     override fun execute(event: MessageCreateEvent): Mono<Unit> {
         val menus = getMenus().getOrElse {
