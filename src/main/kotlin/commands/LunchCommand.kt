@@ -18,7 +18,7 @@ object LunchCommand : Command {
         return event.message.restChannel.createMessage(menus).then(Mono.empty())
     }
 
-    private fun getMenus(): Result<String> {
+    fun getMenus(): Result<String> {
         val document = Jsoup.connect(MENU_URL).get()
 
         val menusDiv = document
@@ -49,7 +49,6 @@ object LunchCommand : Command {
 
         val menuDiv = document
             .select("h1")
-            .also(::println)
             .find { it.text().lowercase().contains(Regex("today'?s lunch")) }
             ?.parent()
             ?: return Result.failure<String>(Exception("Could not find lunch container"))

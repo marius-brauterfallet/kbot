@@ -5,18 +5,18 @@ import commands.PingCommand
 import constants.applicationScope
 import constants.client
 import constants.config
-import constants.logger
 import discord4j.core.DiscordClientBuilder
 import discord4j.core.GatewayDiscordClient
 import discord4j.core.event.domain.message.MessageCreateEvent
 import discord4j.gateway.intent.IntentSet
-import kotlinx.coroutines.*
-import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.datetime.*
 import reactor.core.publisher.Mono
 import kotlin.jvm.optionals.getOrNull
 import kotlin.time.Duration
-import kotlin.time.Duration.Companion.seconds
+import kotlin.time.Duration.Companion.hours
 
 
 fun initializeKbot(): GatewayDiscordClient {
@@ -70,22 +70,33 @@ fun registerCommands() {
 }
 
 fun registerScheduledTasks() {
-//    scheduleTask(applicationScope, Clock.System.now() + 5.seconds, 5.seconds) {
-//        logger.info("HEISANN")
-//    }
+    scheduleDailyTask(applicationScope, LocalTime(0, 9)) {
+        // TODO: Post lunch menu to specified channel
+    }
+}
+
+fun scheduleDailyTask(scope: CoroutineScope, time: LocalTime, task: () -> Unit) {
+    val currentDate = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
+    val runTimeToday = LocalDateTime(currentDate, time).toInstant(TimeZone.currentSystemDefault())
+
+    if ((runTimeToday - Clock.System.now()).isPositive()) {
+        scheduleTask(scope, runTimeToday, 24.hours, task)
+    } else {
+        scheduleTask(scope, runTimeToday + 24.hours, 24.hours, task)
+    }
 }
 
 fun scheduleTask(scope: CoroutineScope, nextRun: Instant, interval: Duration, task: () -> Unit) {
     val firstDelay = nextRun - Clock.System.now()
 
-    runBlocking {
-        launch {
-            delay(firstDelay)
+    println("${firstDelay.inWholeSeconds} seconds delay")
 
-            while (true) {
-                launch { task.invoke() }
-                delay(interval)
-            }
+    scope.launch {
+        delay(firstDelay)
+
+        while (true) {
+            launch { task.invoke() }
+            delay(interval)
         }
     }
 }
