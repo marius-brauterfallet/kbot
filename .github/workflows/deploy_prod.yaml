@@ -42,7 +42,7 @@ jobs:
 
       - name: Run deploy script
         run: |
-          ssh kbot@${{ secrets.SSH_HOST }} "./deploy.sh ${{ env.APP_VERSION }} ${{ secrets.DOCKER_USERNAME }} ${{ secrets.DOCKER_TOKEN }} kbot_prod ${{ secrets.DISCORD_TOKEN_PROD }} ${{ secrets.GUILD_ID_PROD }} ${{ secrets.ROLES_MESSAGE_CHANNEL_ID_PROD }} ${{ secrets.ROLES_MESSAGE_ID_PROD }}"
+          ssh kbot@${{ secrets.SSH_HOST }} "./deploy.sh ${{ env.APP_VERSION }} ${{ secrets.DOCKER_USERNAME }} ${{ secrets.DOCKER_TOKEN }} kbot_prod ${{ secrets.DISCORD_TOKEN_PROD }} ${{ secrets.GUILD_ID_PROD }} ${{ secrets.ROLES_MESSAGE_CHANNEL_ID_PROD }} ${{ secrets.ROLES_MESSAGE_ID_PROD }} ${{ secrets.DAILY_UPDATES_CHANNEL_ID_PROD }}"
 
       - name: SSH cleanup
         run: |
