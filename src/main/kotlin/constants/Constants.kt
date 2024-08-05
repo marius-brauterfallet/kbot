@@ -3,6 +3,9 @@ package constants
 import com.typesafe.config.ConfigFactory
 import discord4j.common.util.Snowflake
 import initializeKbot
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import org.slf4j.LoggerFactory
 import java.util.*
 
@@ -16,6 +19,8 @@ val config = when (environment) {
 val properties = Properties().apply {
     load(Thread.currentThread().contextClassLoader.getResourceAsStream("application.properties"))
 }
+
+val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
 val logger = LoggerFactory.getLogger("kbot") ?: throw Exception("Something went wrong initializing the Logback logger")
 

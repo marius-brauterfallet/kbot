@@ -2,14 +2,21 @@ import commands.Command
 import commands.InfoCommand
 import commands.LunchCommand
 import commands.PingCommand
+import constants.applicationScope
 import constants.client
 import constants.config
+import constants.logger
 import discord4j.core.DiscordClientBuilder
 import discord4j.core.GatewayDiscordClient
 import discord4j.core.event.domain.message.MessageCreateEvent
 import discord4j.gateway.intent.IntentSet
+import kotlinx.coroutines.*
+import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
 import reactor.core.publisher.Mono
 import kotlin.jvm.optionals.getOrNull
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 
 
 fun initializeKbot(): GatewayDiscordClient {
@@ -60,4 +67,25 @@ fun registerCommands() {
             }
         }?.execute(event) ?: Mono.empty()
     }.subscribe()
+}
+
+fun registerScheduledTasks() {
+//    scheduleTask(applicationScope, Clock.System.now() + 5.seconds, 5.seconds) {
+//        logger.info("HEISANN")
+//    }
+}
+
+fun scheduleTask(scope: CoroutineScope, nextRun: Instant, interval: Duration, task: () -> Unit) {
+    val firstDelay = nextRun - Clock.System.now()
+
+    runBlocking {
+        launch {
+            delay(firstDelay)
+
+            while (true) {
+                launch { task.invoke() }
+                delay(interval)
+            }
+        }
+    }
 }
