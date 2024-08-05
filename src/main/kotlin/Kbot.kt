@@ -1,18 +1,21 @@
 import commands.Command
 import commands.InfoCommand
 import commands.LunchCommand
-import commands.LunchCommand.getMenus
 import commands.PingCommand
-import constants.*
+import constants.client
+import constants.config
 import discord4j.core.DiscordClientBuilder
 import discord4j.core.GatewayDiscordClient
 import discord4j.core.event.domain.message.MessageCreateEvent
 import discord4j.gateway.intent.IntentSet
+import handlers.roleChangeHandler
+import handlers.roleReactionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.datetime.*
 import reactor.core.publisher.Mono
+import tasks.registerDailyLunchMessage
 import kotlin.jvm.optionals.getOrNull
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.hours
@@ -70,53 +73,4 @@ fun registerCommands() {
 
 fun registerScheduledTasks() {
     registerDailyLunchMessage()
-}
-
-fun registerDailyLunchMessage() {
-    scheduleWeekdayTask(applicationScope, LocalTime(9, 0)) {
-        val menusMessage = getMenus().getOrElse { exception ->
-            "Could not retrieve today's lunch menus: ${exception.message}".also(logger::error)
-        }
-
-        client.getChannelById(dailyUpdatesChannelId)
-            .flatMap { channel -> channel.restChannel.createMessage(menusMessage) }
-            .doOnError { logger.error("Failed to send message: ${it.message}") }
-            .block()
-    }
-}
-
-fun scheduleDailyTask(scope: CoroutineScope, time: LocalTime, task: () -> Unit) {
-    val currentDate = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
-    val runTimeToday = LocalDateTime(currentDate, time).toInstant(TimeZone.currentSystemDefault())
-
-    if ((runTimeToday - Clock.System.now()).isPositive()) {
-        scheduleTask(scope, runTimeToday, 24.hours, task)
-    } else {
-        scheduleTask(scope, runTimeToday + 24.hours, 24.hours, task)
-    }
-}
-
-fun scheduleWeekdayTask(scope: CoroutineScope, time: LocalTime, task: () -> Unit) {
-    scheduleDailyTask(scope, time) {
-        if (Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).dayOfWeek in listOf(
-                DayOfWeek.SATURDAY,
-                java.time.DayOfWeek.SUNDAY
-            )
-        ) return@scheduleDailyTask
-
-        task.invoke()
-    }
-}
-
-fun scheduleTask(scope: CoroutineScope, nextRun: Instant, interval: Duration, task: () -> Unit) {
-    val firstDelay = nextRun - Clock.System.now()
-
-    scope.launch {
-        delay(firstDelay)
-
-        while (true) {
-            launch { task.invoke() }
-            delay(interval)
-        }
-    }
 }
