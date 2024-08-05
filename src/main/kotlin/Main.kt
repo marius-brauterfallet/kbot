@@ -1,6 +1,7 @@
 import constants.appVersion
 import constants.client
 import constants.logger
+import handlers.updateUserRoles
 
 fun main() {
     logger.info("Launching kbot version $appVersion")

@@ -1,3 +1,6 @@
+package handlers
+
+import GuildRoles
 import constants.client
 import constants.rolesMessageId
 import discord4j.core.event.domain.message.MessageUpdateEvent
