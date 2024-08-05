@@ -1,7 +1,4 @@
-import commands.Command
-import commands.InfoCommand
-import commands.LunchCommand
-import commands.PingCommand
+import commands.registeredCommands
 import constants.client
 import constants.config
 import discord4j.core.DiscordClientBuilder
@@ -36,10 +33,8 @@ fun registerListeners() {
 
 
 fun registerCommands() {
-    val commands: List<Command> = listOf(PingCommand, InfoCommand, LunchCommand)
-
     // Ensure that command names are not used multiple times
-    commands.flatMap { it.commands }
+    registeredCommands.flatMap { it.commands }
         .let { allCommands ->
             val duplicateCommands = allCommands
                 .toSet()
@@ -57,7 +52,7 @@ fun registerCommands() {
 
         val content = event.message.content
 
-        commands.find { command ->
+        registeredCommands.find { command ->
             command.commands.any { commandName ->
                 content.trim() == "!${commandName}" || content.startsWith("!${commandName} ")
             }
