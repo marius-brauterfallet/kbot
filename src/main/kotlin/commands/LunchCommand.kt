@@ -4,7 +4,6 @@ import constants.logger
 import discord4j.core.event.domain.message.MessageCreateEvent
 import org.jsoup.Jsoup
 import reactor.core.publisher.Mono
-import java.util.regex.Pattern
 
 object LunchCommand : Command {
     private const val MENU_URL =
@@ -28,18 +27,14 @@ object LunchCommand : Command {
             ?.parent()
             ?: return Result.failure(Exception())
 
-        val canteenNamePattern = Pattern.compile("\\S+/lnk_(\\S+).jpg")
+        val kotlinPattern = Regex("\\S+/lnk_(\\S+).jpg")
 
         val menus = menusDiv.select("div.link-item").map { div ->
             val aElement = div.selectFirst("a") ?: return@map null
             val imgElement = div.selectFirst("img") ?: return@map null
             val srcAttribute = imgElement.attribute("src").value
 
-            val canteenNameMatcher = canteenNamePattern.matcher(srcAttribute)
-
-            val canteenName = if (canteenNameMatcher.find()) {
-                canteenNameMatcher.group(1).replace('_', ' ')
-            } else "Unknown canteen"
+            val canteenName = kotlinPattern.find(srcAttribute)?.groups?.get(1)?.value?.replace('_', ' ') ?: "Unknown canteen"
 
             val menu = getMenu(aElement.attribute("href").value).getOrDefault("???")
 
