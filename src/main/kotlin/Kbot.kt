@@ -10,15 +10,9 @@ import discord4j.core.event.domain.message.MessageCreateEvent
 import discord4j.gateway.intent.IntentSet
 import handlers.roleChangeHandler
 import handlers.roleReactionHandler
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlinx.datetime.*
 import reactor.core.publisher.Mono
 import tasks.registerDailyLunchMessage
 import kotlin.jvm.optionals.getOrNull
-import kotlin.time.Duration
-import kotlin.time.Duration.Companion.hours
 
 
 fun initializeKbot(): GatewayDiscordClient {
