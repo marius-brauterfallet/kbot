@@ -11,6 +11,7 @@ fun main() {
 
     registerCommands()
     registerListeners()
+    registerScheduledTasks()
 
     client.onDisconnect().block()
 }
