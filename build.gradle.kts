@@ -6,6 +6,8 @@ val discord4j_version: String by project
 val logback_version: String by project
 val jsoup_version: String by project
 
+val kotlinx_datetime_version: String by project
+
 
 plugins {
     kotlin("jvm") version "2.0.0"
@@ -34,6 +36,7 @@ dependencies {
 
     implementation("org.jsoup:jsoup:$jsoup_version")
 
+    implementation("org.jetbrains.kotlinx:kotlinx-datetime:$kotlinx_datetime_version")
 }
 
 application {
