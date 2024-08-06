@@ -7,24 +7,33 @@ import kotlinx.datetime.*
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.hours
 
-fun scheduleDailyTask(scope: CoroutineScope, time: LocalTime, task: () -> Unit) {
-    val currentDate = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
-    val runTimeToday = LocalDateTime(currentDate, time).toInstant(TimeZone.currentSystemDefault())
+fun scheduleDailyTask(
+    scope: CoroutineScope,
+    time: LocalTime,
+    timeZone: TimeZone = TimeZone.currentSystemDefault(),
+    task: () -> Unit,
+) {
+    val currentDate = Clock.System.now().toLocalDateTime(timeZone).date
+    val runTimeToday = LocalDateTime(currentDate, time).toInstant(timeZone)
 
-    if ((runTimeToday - Clock.System.now()).isPositive()) {
-        scheduleTask(scope, runTimeToday, 24.hours, task)
-    } else {
-        scheduleTask(scope, runTimeToday + 24.hours, 24.hours, task)
-    }
+    val runTimeTodayHasPassed = (runTimeToday - Clock.System.now()).isNegative()
+
+    val nextRunTime = if (runTimeTodayHasPassed) runTimeToday + 24.hours else runTimeToday
+
+    scheduleTask(scope, nextRunTime, 24.hours, task)
 }
 
-fun scheduleWeekdayTask(scope: CoroutineScope, time: LocalTime, task: () -> Unit) {
-    scheduleDailyTask(scope, time) {
-        if (Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).dayOfWeek in listOf(
-                DayOfWeek.SATURDAY,
-                java.time.DayOfWeek.SUNDAY
-            )
-        ) return@scheduleDailyTask
+fun scheduleWeekdayTask(
+    scope: CoroutineScope,
+    time: LocalTime,
+    timeZone: TimeZone = TimeZone.currentSystemDefault(),
+    task: () -> Unit,
+) {
+    scheduleDailyTask(scope, time, timeZone) {
+        val weekdays = listOf(DayOfWeek.SATURDAY, java.time.DayOfWeek.SUNDAY)
+
+        if (Clock.System.now().toLocalDateTime(timeZone).dayOfWeek in weekdays)
+            return@scheduleDailyTask
 
         task.invoke()
     }
