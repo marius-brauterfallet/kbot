@@ -1,6 +1,9 @@
 package services
 
 import constants.logger
+import kotlinx.datetime.*
+import kotlinx.datetime.format.MonthNames
+import kotlinx.datetime.format.char
 import org.jsoup.Jsoup
 
 object LunchService {
@@ -25,7 +28,7 @@ object LunchService {
         "pizza" to "🍕"
     )
 
-    fun getMenus(): Result<String> {
+    fun getMenus(withDate: Boolean = false): Result<String> {
         val document = Jsoup.connect(MENU_URL).get()
 
         val menusDiv = document
@@ -36,18 +39,34 @@ object LunchService {
 
         val kotlinPattern = Regex("\\S+/lnk_(\\S+).jpg")
 
-        val menus = menusDiv.select("div.link-item").map { div ->
-            val aElement = div.selectFirst("a") ?: return@map null
-            val imgElement = div.selectFirst("img") ?: return@map null
-            val srcAttribute = imgElement.attribute("src").value
+        val menus = menusDiv.select("div.link-item")
+            .map { div ->
+                val aElement = div.selectFirst("a") ?: return@map null
+                val imgElement = div.selectFirst("img") ?: return@map null
+                val srcAttribute = imgElement.attribute("src").value
 
-            val canteenName = kotlinPattern.find(srcAttribute)?.groups?.get(1)?.value?.replace('_', ' ')
-                ?: "Unknown canteen"
+                val canteenName = kotlinPattern.find(srcAttribute)?.groups?.get(1)?.value?.replace('_', ' ')
+                    ?: "Unknown canteen"
 
-            val menu = getMenu(aElement.attribute("href").value).getOrDefault("???")
+                val menu = getMenu(aElement.attribute("href").value).getOrDefault("???")
 
-            "# $canteenName\n$menu"
-        }.joinToString("\n\n")
+                "## $canteenName\n$menu"
+            }
+            .joinToString("\n\n")
+            .let {
+                if (withDate) {
+                    val currentDate = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
+                    val dateFormat = LocalDate.Format {
+                        dayOfMonth()
+                        chars(". ")
+                        monthName(MonthNames.ENGLISH_FULL)
+                        char(' ')
+                        year()
+                    }
+
+                    "# Lunch menu ${currentDate.format(dateFormat)}\n$it"
+                } else it
+            }
 
         return Result.success(menus)
     }
