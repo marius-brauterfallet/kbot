@@ -8,6 +8,7 @@ import discord4j.gateway.intent.IntentSet
 import handlers.roleChangeHandler
 import handlers.roleReactionHandler
 import reactor.core.publisher.Mono
+import tasks.registerAttendanceMessageTask
 import tasks.registerDailyLunchMessage
 import kotlin.jvm.optionals.getOrNull
 
@@ -62,4 +63,5 @@ fun registerCommands() {
 
 fun registerScheduledTasks() {
     registerDailyLunchMessage()
+    registerAttendanceMessageTask()
 }
