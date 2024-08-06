@@ -5,10 +5,11 @@ import constants.client
 import constants.dailyUpdatesChannelId
 import constants.logger
 import kotlinx.datetime.LocalTime
+import kotlinx.datetime.TimeZone
 import services.LunchService.getMenus
 
 fun registerDailyLunchMessage() {
-    scheduleWeekdayTask(applicationScope, LocalTime(9, 0)) {
+    scheduleWeekdayTask(applicationScope, LocalTime(9, 0), TimeZone.of("Europe/Oslo")) {
         val menusMessage = getMenus().getOrElse { exception ->
             "Could not retrieve today's lunch menus: ${exception.message}".also(logger::error)
         }
