@@ -7,6 +7,24 @@ object LunchService {
     private const val MENU_URL =
         "https://widget.inisign.com/Widget/Customers/Customer.aspx?token=c5a641de-e74e-48eb-be4e-d847f261ec11"
 
+    private val lunchEmojis = listOf(
+        "wings" to "🍗",
+        "soup" to "🍲",
+        "shrimp" to "🦐",
+        "scampi" to "🦐",
+        "rice" to "🍚",
+        "chicken" to "🍗",
+        "pasta" to "🍝",
+        "pork" to "🥩",
+        "bacon" to "🥓",
+        "beef" to "🍖",
+        "potato" to "🥔",
+        "salmon" to "🐟",
+        "stew" to "🍲",
+        "sausage" to "🌭",
+        "pizza" to "🍕"
+    )
+
     fun getMenus(): Result<String> {
         val document = Jsoup.connect(MENU_URL).get()
 
@@ -44,7 +62,13 @@ object LunchService {
             ?: return Result.failure<String>(Exception("Could not find lunch container"))
                 .also { logger.error(it.exceptionOrNull()?.message) }
 
-        val menu = menuDiv.select("h2").joinToString("\n") { it.text() }
+        val menu = menuDiv.select("h2").joinToString("\n") { menuElement ->
+            val line = menuElement.text()
+            val lineLower = line.lowercase()
+            val emojis = lunchEmojis.filter { lineLower.contains(it.first) }.joinToString(" ") { it.second }
+
+            "$line $emojis"
+        }
 
         return Result.success(menu)
     }
