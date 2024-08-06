@@ -10,7 +10,7 @@ import services.LunchService.getMenus
 
 fun registerDailyLunchMessage() {
     scheduleWeekdayTask(applicationScope, LocalTime(9, 0), TimeZone.of("Europe/Oslo")) {
-        val menusMessage = getMenus().getOrElse { exception ->
+        val menusMessage = getMenus(true).getOrElse { exception ->
             "Could not retrieve today's lunch menus: ${exception.message}".also(logger::error)
         }
 
