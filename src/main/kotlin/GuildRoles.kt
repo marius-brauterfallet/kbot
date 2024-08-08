@@ -17,7 +17,7 @@ object GuildRoles {
 
         return client.getMessageById(rolesMessageChannelId, rolesMessageId).map { rolesMessage ->
             _roles = rolesMessage.content.lines().mapNotNull { line ->
-                val match = Regex("(\\S)\\s*->\\s*<@&(\\d+)>.*").matchEntire(line.trim()) ?: return@mapNotNull null
+                val match = Regex("(\\S+)\\s*->\\s*<@&(\\d+)>.*").matchEntire(line.trim()) ?: return@mapNotNull null
 
                 val emoji = match.groups[1]?.value ?: return@mapNotNull null
                 val id = match.groups[2]?.value?.toLongOrNull()?.let { Snowflake.of(it) } ?: return@mapNotNull null
