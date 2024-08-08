@@ -1,3 +1,5 @@
+package services
+
 import constants.client
 import constants.logger
 import constants.rolesMessageChannelId
@@ -6,7 +8,7 @@ import discord4j.common.util.Snowflake
 import model.UserRole
 import reactor.core.publisher.Mono
 
-object GuildRoles {
+object GuildRolesService {
     private var _roles: List<UserRole> = emptyList()
 
     val roles: List<UserRole>
