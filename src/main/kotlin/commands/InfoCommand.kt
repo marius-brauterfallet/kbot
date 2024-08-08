@@ -9,7 +9,7 @@ object InfoCommand : Command {
 
     override fun execute(event: MessageCreateEvent): Mono<Unit> {
         return event.message.channel.flatMap { channel ->
-            channel.createMessage("This is an instance of kbot version ${constants.appVersion}").then(Mono.empty())
+            channel.createMessage("This is an instance of kbot version ${constants.appVersion}. You can take a look at my code [here](https://github.com/marius-brauterfallet/kbot)").then(Mono.empty())
         }
     }
 }
