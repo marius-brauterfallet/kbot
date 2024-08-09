@@ -12,7 +12,6 @@ import tasks.registerAttendanceMessageTask
 import tasks.registerDailyLunchMessage
 import kotlin.jvm.optionals.getOrNull
 
-
 fun initializeKbot(): GatewayDiscordClient {
     val discordToken = config.getString("discord.token")
         ?: throw IllegalStateException("Something went wrong when retrieving the Discord token. Environment variable DISCORD_TOKEN might be missing")
@@ -22,23 +21,18 @@ fun initializeKbot(): GatewayDiscordClient {
         .gateway()
         .setEnabledIntents(IntentSet.all())
         .login()
-        .block()
-        ?: throw IllegalStateException("Something went wrong when initializing the Discord bot")
+        .block() ?: throw IllegalStateException("Something went wrong when initializing the Discord bot")
 }
-
 
 fun registerListeners() {
     roleChangeHandler()
     roleReactionHandler()
 }
 
-
-fun registerCommands() {
-    // Ensure that command names are not used multiple times
+fun registerCommands() { // Ensure that command names are not used multiple times
     registeredCommands.flatMap { it.commands }
         .let { allCommands ->
-            val duplicateCommands = allCommands
-                .toSet()
+            val duplicateCommands = allCommands.toSet()
                 .map { command -> command to allCommands.count { it == command } }
                 .filter { it.second != 1 }
                 .map { it.first }
@@ -53,12 +47,16 @@ fun registerCommands() {
 
         val content = event.message.content
 
-        registeredCommands.find { command ->
+        val command = registeredCommands.find { command ->
             command.commands.any { commandName ->
                 content.trim() == "!${commandName}" || content.startsWith("!${commandName} ")
             }
-        }?.execute(event) ?: Mono.empty()
-    }.subscribe()
+        } ?: return@on Mono.empty()
+
+        command.execute(event)
+            .flatMap { event.message.restMessage.delete("Command executed successfully") }
+    }
+        .subscribe()
 }
 
 fun registerScheduledTasks() {
