@@ -7,9 +7,7 @@ object InfoCommand : Command {
     override val commands = listOf("info")
     override val description = "Responds with info about the bot"
 
-    override fun execute(event: MessageCreateEvent): Mono<Unit> {
-        return event.message.channel.flatMap { channel ->
-            channel.createMessage("This is an instance of kbot version ${constants.appVersion}").then(Mono.empty())
-        }
-    }
+    override fun execute(event: MessageCreateEvent): Mono<Unit> =
+        event.message.restChannel.createMessage("This is an instance of kbot version ${constants.appVersion}")
+            .thenReturn(Unit)
 }
