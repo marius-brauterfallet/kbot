@@ -7,9 +7,8 @@ object PingCommand : Command {
     override val commands = listOf("ping")
     override val description = "Responds with 'Pong!'"
 
-    override fun execute(event: MessageCreateEvent): Mono<Unit> {
-        return event.message.channel.flatMap { channel ->
-            channel.createMessage("Pong!").then(Mono.empty())
-        }
+    override fun execute(event: MessageCreateEvent): Mono<Unit> = event.message.channel.flatMap { channel ->
+        channel.createMessage("Pong!")
+            .thenReturn(Unit)
     }
 }

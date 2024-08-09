@@ -8,9 +8,13 @@ object HelpCommand : Command {
     override val description = "Lists all available commands"
 
     override fun execute(event: MessageCreateEvent): Mono<Unit> {
-        return event.message.restChannel.createMessage("# Commands\n" + registeredCommands.joinToString("\n") { command ->
+        val commandsList = registeredCommands.joinToString("\n") { command ->
             "${command.commands.joinToString { "!$it" }} - ${command.description}"
-        }).then(Mono.empty())
-    }
+        }
 
+        val message = "# Commands\n$commandsList"
+
+        return event.message.restChannel.createMessage(message)
+            .thenReturn(Unit)
+    }
 }
