@@ -9,10 +9,9 @@ object LunchCommand : Command {
     override val description = "Responds with today's lunch menus"
 
     override fun execute(event: MessageCreateEvent): Mono<Unit> {
-        val menus = getMenus().getOrElse {
-            return event.message.channel.flatMap { it.createMessage("Menus is unavailable!").then(Mono.empty()) }
-        }
+        val message = getMenus().getOrDefault("Menus is unavailable!")
 
-        return event.message.restChannel.createMessage(menus).then(Mono.empty())
+        return event.message.restChannel.createMessage(message)
+            .thenReturn(Unit)
     }
 }
