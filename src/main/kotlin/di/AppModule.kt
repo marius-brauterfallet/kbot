@@ -1,12 +1,17 @@
 package di
 
-import KbotConfig
-import KbotProperties
+import model.KbotConfig
+import model.KbotProperties
 import com.typesafe.config.ConfigFactory
 import discord4j.core.DiscordClientBuilder
+import discord4j.core.GatewayDiscordClient
 import discord4j.gateway.intent.IntentSet
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
+import org.slf4j.LoggerFactory
 import services.GuildRolesService
 import services.GuildRolesServiceImpl
 import services.LunchService
@@ -44,6 +49,20 @@ val appModule = module {
         KbotProperties(properties)
     }
 
+    single {
+        val client: GatewayDiscordClient = get()
+        val config: KbotConfig = get()
+
+        client.getGuildById(config.guildId).block()
+            ?: throw IllegalStateException("Something went wrong when retrieving the guild id. Environment variable GUILD_ID might be missing")
+    }
+
+    single { CoroutineScope(SupervisorJob() + Dispatchers.Default) }
+    single {
+        LoggerFactory.getLogger("kbot") ?: throw Exception("Something went wrong initializing the Logback logger")
+    }
+
+    // Services
     singleOf<LunchService>(::LunchServiceImpl)
     singleOf<GuildRolesService>(::GuildRolesServiceImpl)
 }

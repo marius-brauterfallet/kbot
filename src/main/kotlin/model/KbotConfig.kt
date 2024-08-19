@@ -1,3 +1,5 @@
+package model
+
 import com.typesafe.config.Config
 import discord4j.common.util.Snowflake
 
