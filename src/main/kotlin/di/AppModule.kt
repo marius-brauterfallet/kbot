@@ -5,7 +5,10 @@ import KbotProperties
 import com.typesafe.config.ConfigFactory
 import discord4j.core.DiscordClientBuilder
 import discord4j.gateway.intent.IntentSet
+import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
+import services.LunchService
+import services.LunchServiceImpl
 import java.util.*
 
 val appModule = module {
@@ -38,4 +41,6 @@ val appModule = module {
 
         KbotProperties(properties)
     }
+
+    singleOf<LunchService>(::LunchServiceImpl)
 }
