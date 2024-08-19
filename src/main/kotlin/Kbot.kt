@@ -4,8 +4,8 @@ import discord4j.core.event.domain.message.MessageCreateEvent
 import handlers.roleChangeHandler
 import handlers.roleReactionHandler
 import reactor.core.publisher.Mono
+import tasks.DailyLunchMessageTask.registerDailyLunchMessage
 import tasks.registerAttendanceMessageTask
-import tasks.registerDailyLunchMessage
 import kotlin.jvm.optionals.getOrNull
 
 fun registerListeners() {
