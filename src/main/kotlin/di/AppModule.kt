@@ -1,10 +1,12 @@
 package di
 
 import KbotConfig
+import KbotProperties
 import com.typesafe.config.ConfigFactory
 import discord4j.core.DiscordClientBuilder
 import discord4j.gateway.intent.IntentSet
 import org.koin.dsl.module
+import java.util.*
 
 val appModule = module {
     single {
@@ -27,5 +29,13 @@ val appModule = module {
             .setEnabledIntents(IntentSet.all())
             .login()
             .block() ?: throw IllegalStateException("Something went wrong when initializing the Discord bot")
+    }
+
+    single {
+        val properties = Properties().apply {
+            load(Thread.currentThread().contextClassLoader.getResourceAsStream("application.properties"))
+        }
+
+        KbotProperties(properties)
     }
 }
