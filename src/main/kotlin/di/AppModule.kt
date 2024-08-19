@@ -7,6 +7,8 @@ import discord4j.core.DiscordClientBuilder
 import discord4j.gateway.intent.IntentSet
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
+import services.GuildRolesService
+import services.GuildRolesServiceImpl
 import services.LunchService
 import services.LunchServiceImpl
 import java.util.*
@@ -43,4 +45,5 @@ val appModule = module {
     }
 
     singleOf<LunchService>(::LunchServiceImpl)
+    singleOf<GuildRolesService>(::GuildRolesServiceImpl)
 }
