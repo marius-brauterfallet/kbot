@@ -1,8 +1,8 @@
 import commands.registeredCommands
 import constants.Constants.client
 import discord4j.core.event.domain.message.MessageCreateEvent
-import handlers.roleChangeHandler
-import handlers.roleReactionHandler
+import handlers.RoleReactionHandler.roleReactionHandler
+import handlers.RoleUpdateHandler.roleChangeHandler
 import reactor.core.publisher.Mono
 import tasks.DailyLunchMessageTask.registerDailyLunchMessage
 import tasks.registerAttendanceMessageTask
