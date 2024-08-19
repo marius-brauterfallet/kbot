@@ -7,6 +7,7 @@ val logback_version: String by project
 val jsoup_version: String by project
 
 val kotlinx_datetime_version: String by project
+val koin_version: String by project
 
 
 plugins {
@@ -37,6 +38,8 @@ dependencies {
     implementation("org.jsoup:jsoup:$jsoup_version")
 
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:$kotlinx_datetime_version")
+    implementation("io.insert-koin:koin-core:$koin_version")
+
 }
 
 application {
