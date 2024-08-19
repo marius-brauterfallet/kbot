@@ -1,17 +1,24 @@
 package services
 
-import constants.Constants.client
-import constants.Constants.config
-import constants.Constants.guild
-import constants.Constants.logger
 import discord4j.common.util.Snowflake
+import discord4j.core.GatewayDiscordClient
+import discord4j.core.`object`.entity.Guild
 import discord4j.core.`object`.reaction.ReactionEmoji
+import model.KbotConfig
 import model.UserRole
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
+import org.slf4j.Logger
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
-class GuildRolesServiceImpl : GuildRolesService {
+class GuildRolesServiceImpl : GuildRolesService, KoinComponent {
     private var _roles: List<UserRole> = emptyList()
+
+    private val client: GatewayDiscordClient by inject()
+    private val config: KbotConfig by inject()
+    private val logger: Logger by inject()
+    private val guild: Guild by inject()
 
     private fun updateRolesList(): Mono<Unit> {
         logger.info("Updating guild role list...")
