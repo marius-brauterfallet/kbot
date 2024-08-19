@@ -1,25 +1,25 @@
 package handlers
 
-import constants.Constants.client
-import constants.Constants.config
-import constants.Constants.guild
-import constants.Constants.logger
+import discord4j.core.GatewayDiscordClient
 import discord4j.core.event.domain.message.ReactionAddEvent
 import discord4j.core.event.domain.message.ReactionRemoveEvent
+import discord4j.core.`object`.entity.Guild
 import discord4j.core.`object`.entity.Member
 import discord4j.core.`object`.reaction.ReactionEmoji
+import model.KbotConfig
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
-import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import services.GuildRolesService
-import services.GuildRolesServiceImpl
 import kotlin.jvm.optionals.getOrElse
 
 object RoleReactionHandler : KoinComponent {
     private val guildRolesService: GuildRolesService by inject()
+    private val client: GatewayDiscordClient by inject()
+    private val config: KbotConfig by inject()
+    private val guild: Guild by inject()
 
-    fun roleReactionHandler() {
+    fun init() {
         client.on(ReactionAddEvent::class.java) { event ->
             if (event.messageId != config.rolesMessageId) return@on Mono.empty()
 
@@ -39,7 +39,7 @@ object RoleReactionHandler : KoinComponent {
     }
 
 
-    fun handleEmojiRoleChange(member: Member, emoji: ReactionEmoji, addRole: Boolean): Mono<Unit> {
+    private fun handleEmojiRoleChange(member: Member, emoji: ReactionEmoji, addRole: Boolean): Mono<Unit> {
         val emojiString = emoji.asUnicodeEmoji().getOrElse { return Mono.empty() }.raw
 
         val userRole = guildRolesService.getRoleByEmoji(emojiString) ?: return Mono.empty()

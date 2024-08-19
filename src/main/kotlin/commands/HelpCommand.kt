@@ -1,5 +1,6 @@
 package commands
 
+import commands.Commands.registeredCommands
 import discord4j.core.event.domain.message.MessageCreateEvent
 import reactor.core.publisher.Mono
 
