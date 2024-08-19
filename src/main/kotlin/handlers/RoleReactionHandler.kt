@@ -1,6 +1,5 @@
 package handlers
 
-import GuildRoles
 import constants.Constants.client
 import constants.Constants.config
 import constants.Constants.guild
@@ -9,56 +8,44 @@ import discord4j.core.event.domain.message.ReactionAddEvent
 import discord4j.core.event.domain.message.ReactionRemoveEvent
 import discord4j.core.`object`.entity.Member
 import discord4j.core.`object`.reaction.ReactionEmoji
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
+import services.GuildRolesService
+import services.GuildRolesServiceImpl
 import kotlin.jvm.optionals.getOrElse
 
-fun roleReactionHandler() {
-    client.on(ReactionAddEvent::class.java) { event ->
-        if (event.messageId != config.rolesMessageId) return@on Mono.empty()
+object RoleReactionHandler : KoinComponent {
+    private val guildRolesService: GuildRolesService by inject()
 
-        val member = event.member.getOrElse { return@on Mono.empty() }
+    fun roleReactionHandler() {
+        client.on(ReactionAddEvent::class.java) { event ->
+            if (event.messageId != config.rolesMessageId) return@on Mono.empty()
 
-        handleEmojiRoleChange(member, event.emoji, true)
-    }.subscribe()
+            val member = event.member.getOrElse { return@on Mono.empty() }
 
-    client.on(ReactionRemoveEvent::class.java) { event ->
-        if (event.messageId != config.rolesMessageId) return@on Mono.empty()
+            handleEmojiRoleChange(member, event.emoji, true)
+        }.subscribe()
 
-        event.user
-            .flatMap { it.asMember(guild.id) }
-            .flatMap { member -> handleEmojiRoleChange(member, event.emoji, false) }
+        client.on(ReactionRemoveEvent::class.java) { event ->
+            if (event.messageId != config.rolesMessageId) return@on Mono.empty()
 
-    }.subscribe()
-}
+            event.user
+                .flatMap { it.asMember(guild.id) }
+                .flatMap { member -> handleEmojiRoleChange(member, event.emoji, false) }
 
-
-fun handleEmojiRoleChange(member: Member, emoji: ReactionEmoji, addRole: Boolean): Mono<Unit> {
-    val emojiString = emoji.asUnicodeEmoji().getOrElse { return Mono.empty() }.raw
-
-    val userRole = GuildRoles.roles.find { role -> role.emoji == emojiString } ?: return Mono.empty()
-
-    return guild.getRoleById(userRole.id)
-        .flatMap { role -> if (addRole) member.addRole(role.id) else member.removeRole(role.id) }
-        .then(Mono.empty())
-}
+        }.subscribe()
+    }
 
 
-fun updateUserRoles(): Flux<Void> {
-    logger.info("Updating user roles...")
+    fun handleEmojiRoleChange(member: Member, emoji: ReactionEmoji, addRole: Boolean): Mono<Unit> {
+        val emojiString = emoji.asUnicodeEmoji().getOrElse { return Mono.empty() }.raw
 
-    return guild.members.collectList().flatMapMany { guildMembers ->
-        client.getMessageById(config.rolesMessageChannelId, config.rolesMessageId).flatMapMany { rolesMessage ->
-            Flux.concat(GuildRoles.roles.map { userRole ->
-                rolesMessage.getReactors(ReactionEmoji.unicode(userRole.emoji)).collectList().flatMapMany { reactors ->
-                    Flux.fromIterable(guildMembers).flatMap { member ->
-                        if (reactors.any { it.id == member.id })
-                            member.addRole(userRole.id)
-                        else
-                            member.removeRole(userRole.id)
-                    }
-                }
-            })
-        }
-    }.doOnComplete { logger.info("User roles update completed.") }
+        val userRole = guildRolesService.getRoleByEmoji(emojiString) ?: return Mono.empty()
+
+        return guild.getRoleById(userRole.id)
+            .flatMap { role -> if (addRole) member.addRole(role.id) else member.removeRole(role.id) }
+            .then(Mono.empty())
+    }
 }
