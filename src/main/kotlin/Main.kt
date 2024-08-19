@@ -1,5 +1,5 @@
-import constants.Constants.appVersion
 import constants.Constants.logger
+import constants.Constants.properties
 import di.appModule
 import discord4j.core.GatewayDiscordClient
 import handlers.updateUserRoles
@@ -19,7 +19,7 @@ class KbotApp : KoinComponent {
     private val client: GatewayDiscordClient by inject()
 
     fun start() {
-        logger.info("Launching kbot version $appVersion")
+        logger.info("Launching kbot version ${properties.appVersion}")
 
         GuildRoles.updateRoles()
             .flatMapMany { updateUserRoles() }
