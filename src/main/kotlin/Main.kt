@@ -1,18 +1,34 @@
-import constants.appVersion
-import constants.client
-import constants.logger
+import constants.Constants.appVersion
+import constants.Constants.logger
+import di.appModule
+import discord4j.core.GatewayDiscordClient
 import handlers.updateUserRoles
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
+import org.koin.core.context.startKoin
 
 fun main() {
-    logger.info("Launching kbot version $appVersion")
+    startKoin {
+        modules(appModule)
+    }
 
-    GuildRoles.updateRoles()
-        .flatMapMany { updateUserRoles() }
-        .subscribe()
+    KbotApp().start()
+}
 
-    registerCommands()
-    registerListeners()
-    registerScheduledTasks()
+class KbotApp : KoinComponent {
+    private val client: GatewayDiscordClient by inject()
 
-    client.onDisconnect().block()
+    fun start() {
+        logger.info("Launching kbot version $appVersion")
+
+        GuildRoles.updateRoles()
+            .flatMapMany { updateUserRoles() }
+            .subscribe()
+
+        registerCommands()
+        registerListeners()
+        registerScheduledTasks()
+
+        client.onDisconnect().block()
+    }
 }

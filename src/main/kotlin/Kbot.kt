@@ -1,28 +1,12 @@
 import commands.registeredCommands
-import constants.client
-import constants.config
-import discord4j.core.DiscordClientBuilder
-import discord4j.core.GatewayDiscordClient
+import constants.Constants.client
 import discord4j.core.event.domain.message.MessageCreateEvent
-import discord4j.gateway.intent.IntentSet
 import handlers.roleChangeHandler
 import handlers.roleReactionHandler
 import reactor.core.publisher.Mono
 import tasks.registerAttendanceMessageTask
 import tasks.registerDailyLunchMessage
 import kotlin.jvm.optionals.getOrNull
-
-fun initializeKbot(): GatewayDiscordClient {
-    val discordToken = config.getString("discord.token")
-        ?: throw IllegalStateException("Something went wrong when retrieving the Discord token. Environment variable DISCORD_TOKEN might be missing")
-
-    return DiscordClientBuilder.create(discordToken)
-        .build()
-        .gateway()
-        .setEnabledIntents(IntentSet.all())
-        .login()
-        .block() ?: throw IllegalStateException("Something went wrong when initializing the Discord bot")
-}
 
 fun registerListeners() {
     roleChangeHandler()

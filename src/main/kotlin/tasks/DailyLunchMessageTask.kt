@@ -1,9 +1,9 @@
 package tasks
 
-import constants.applicationScope
-import constants.client
-import constants.dailyUpdatesChannelId
-import constants.logger
+import constants.Constants.applicationScope
+import constants.Constants.client
+import constants.Constants.config
+import constants.Constants.logger
 import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
 import services.LunchService.getMenus
@@ -14,7 +14,7 @@ fun registerDailyLunchMessage() {
             "Could not retrieve today's lunch menus: ${exception.message}".also(logger::error)
         }
 
-        client.getChannelById(dailyUpdatesChannelId)
+        client.getChannelById(config.dailyUpdatesChannelId)
             .flatMap { channel -> channel.restChannel.createMessage(menusMessage) }
             .doOnError { logger.error("Failed to send message: ${it.message}") }
             .block()
