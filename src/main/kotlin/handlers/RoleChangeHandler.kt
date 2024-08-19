@@ -1,14 +1,14 @@
 package handlers
 
 import GuildRoles
-import constants.client
-import constants.rolesMessageId
+import constants.Constants.client
+import constants.Constants.config
 import discord4j.core.event.domain.message.MessageUpdateEvent
 import reactor.core.publisher.Mono
 
 fun roleChangeHandler() {
     client.on(MessageUpdateEvent::class.java) { event ->
-        if (event.messageId != rolesMessageId) return@on Mono.empty<Unit>()
+        if (event.messageId != config.rolesMessageId) return@on Mono.empty<Unit>()
 
         GuildRoles.updateRoles()
             .flatMapMany { updateUserRoles() }

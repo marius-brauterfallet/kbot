@@ -1,7 +1,10 @@
 package handlers
 
 import GuildRoles
-import constants.*
+import constants.Constants.client
+import constants.Constants.config
+import constants.Constants.guild
+import constants.Constants.logger
 import discord4j.core.event.domain.message.ReactionAddEvent
 import discord4j.core.event.domain.message.ReactionRemoveEvent
 import discord4j.core.`object`.entity.Member
@@ -12,7 +15,7 @@ import kotlin.jvm.optionals.getOrElse
 
 fun roleReactionHandler() {
     client.on(ReactionAddEvent::class.java) { event ->
-        if (event.messageId != rolesMessageId) return@on Mono.empty()
+        if (event.messageId != config.rolesMessageId) return@on Mono.empty()
 
         val member = event.member.getOrElse { return@on Mono.empty() }
 
@@ -20,7 +23,7 @@ fun roleReactionHandler() {
     }.subscribe()
 
     client.on(ReactionRemoveEvent::class.java) { event ->
-        if (event.messageId != rolesMessageId) return@on Mono.empty()
+        if (event.messageId != config.rolesMessageId) return@on Mono.empty()
 
         event.user
             .flatMap { it.asMember(guild.id) }
@@ -45,7 +48,7 @@ fun updateUserRoles(): Flux<Void> {
     logger.info("Updating user roles...")
 
     return guild.members.collectList().flatMapMany { guildMembers ->
-        client.getMessageById(rolesMessageChannelId, rolesMessageId).flatMapMany { rolesMessage ->
+        client.getMessageById(config.rolesMessageChannelId, config.rolesMessageId).flatMapMany { rolesMessage ->
             Flux.concat(GuildRoles.roles.map { userRole ->
                 rolesMessage.getReactors(ReactionEmoji.unicode(userRole.emoji)).collectList().flatMapMany { reactors ->
                     Flux.fromIterable(guildMembers).flatMap { member ->
