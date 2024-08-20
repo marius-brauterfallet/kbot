@@ -6,7 +6,7 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import reactor.core.publisher.Mono
 
-object InfoCommand : Command, KoinComponent {
+object InfoCommand: Command, KoinComponent {
     private val properties: KbotProperties by inject()
 
     override val commands = listOf("info")

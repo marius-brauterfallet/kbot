@@ -5,19 +5,17 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
 import model.KbotConfig
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
 import org.slf4j.Logger
 import services.LunchService
 import tasks.TaskScheduling.scheduleWeekdayTask
 
-object DailyLunchMessageTask : KoinComponent {
-    private val lunchService: LunchService by inject()
-    private val applicationScope: CoroutineScope by inject()
-    private val client: GatewayDiscordClient by inject()
-    private val config: KbotConfig by inject()
-    private val logger: Logger by inject()
-
+class DailyLunchMessageTask(
+    private val applicationScope: CoroutineScope,
+    private val client: GatewayDiscordClient,
+    private val lunchService: LunchService,
+    private val config: KbotConfig,
+    private val logger: Logger,
+) {
     fun register() {
         scheduleWeekdayTask(applicationScope, LocalTime(9, 0), TimeZone.of("Europe/Oslo")) {
             val menusMessage = lunchService.getMenus(true).getOrElse { exception ->

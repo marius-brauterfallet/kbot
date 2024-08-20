@@ -1,10 +1,13 @@
 package commands
 
-import commands.Commands.registeredCommands
 import discord4j.core.event.domain.message.MessageCreateEvent
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 import reactor.core.publisher.Mono
 
-object HelpCommand : Command {
+object HelpCommand: Command, KoinComponent {
+    private val registeredCommands: List<Command> by inject()
+
     override val commands = listOf("help")
     override val description = "Lists all available commands"
 

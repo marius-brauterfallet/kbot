@@ -6,7 +6,7 @@ import org.koin.core.component.inject
 import reactor.core.publisher.Mono
 import services.LunchService
 
-object LunchCommand : Command, KoinComponent {
+object LunchCommand: Command, KoinComponent {
     private val lunchService: LunchService by inject()
 
     override val commands = listOf("lunch", "lunsj", "menu", "meny")

@@ -7,18 +7,16 @@ import discord4j.core.`object`.entity.Guild
 import discord4j.core.`object`.entity.Member
 import discord4j.core.`object`.reaction.ReactionEmoji
 import model.KbotConfig
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
 import reactor.core.publisher.Mono
 import services.GuildRolesService
 import kotlin.jvm.optionals.getOrElse
 
-object RoleReactionHandler : KoinComponent {
-    private val guildRolesService: GuildRolesService by inject()
-    private val client: GatewayDiscordClient by inject()
-    private val config: KbotConfig by inject()
-    private val guild: Guild by inject()
-
+class RoleReactionHandler(
+    private val guildRolesService: GuildRolesService,
+    private val client: GatewayDiscordClient,
+    private val config: KbotConfig,
+    private val guild: Guild
+) {
     fun init() {
         client.on(ReactionAddEvent::class.java) { event ->
             if (event.messageId != config.rolesMessageId) return@on Mono.empty()
