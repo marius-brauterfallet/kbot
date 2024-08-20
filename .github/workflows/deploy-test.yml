@@ -44,4 +44,3 @@ jobs:
               -e ROLES_MESSAGE_ID=${{ secrets.ROLES_MESSAGE_ID_TEST }} \
               -e DAILY_UPDATES_CHANNEL_ID=${{ secrets.DAILY_UPDATES_CHANNEL_ID_TEST }} \
               ${{ secrets.DOCKER_REGISTRY_NAME }}/kbot:${{ env.APP_VERSION }}
-            echo "HALLA BALLA"
