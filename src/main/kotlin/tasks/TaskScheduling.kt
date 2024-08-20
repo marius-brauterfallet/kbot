@@ -8,11 +8,6 @@ import kotlin.time.Duration
 import kotlin.time.Duration.Companion.hours
 
 object TaskScheduling {
-    fun registerScheduledTasks() {
-        DailyLunchMessageTask.register()
-        AttendanceMessageTask.register()
-    }
-
     private fun scheduleDailyTask(
         scope: CoroutineScope,
         time: LocalTime,

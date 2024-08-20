@@ -1,14 +1,20 @@
-import commands.Commands.registerCommands
+import commands.HelpCommand
+import commands.InfoCommand
+import commands.LunchCommand
+import commands.PingCommand
 import di.appModule
 import discord4j.core.GatewayDiscordClient
-import handlers.Handlers.registerHandlers
+import handlers.CommandHandler
+import handlers.RoleReactionHandler
+import handlers.RoleUpdateHandler
 import model.KbotProperties
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.koin.core.context.startKoin
 import org.slf4j.Logger
 import services.GuildRolesService
-import tasks.TaskScheduling.registerScheduledTasks
+import tasks.AttendanceMessageTask
+import tasks.DailyLunchMessageTask
 
 fun main() {
     startKoin {
@@ -24,15 +30,32 @@ class KbotApp : KoinComponent {
     private val logger: Logger by inject()
     private val properties: KbotProperties by inject()
 
+    private val roleUpdateHandler: RoleUpdateHandler by inject()
+    private val roleReactionHandler: RoleReactionHandler by inject()
+    private val commandHandler: CommandHandler by inject()
+
+    private val dailyLunchMessageTask: DailyLunchMessageTask by inject()
+    private val attendanceMessageTask: AttendanceMessageTask by inject()
+
     fun start() {
         logger.info("Launching kbot version ${properties.appVersion}")
 
         guildRolesService.updateUserRoles().subscribe()
 
-        registerCommands()
         registerHandlers()
         registerScheduledTasks()
 
         client.onDisconnect().block()
+    }
+
+    private fun registerHandlers() {
+        roleUpdateHandler.init()
+        roleReactionHandler.init()
+        commandHandler.init()
+    }
+
+    private fun registerScheduledTasks() {
+        dailyLunchMessageTask.register()
+        attendanceMessageTask.register()
     }
 }
