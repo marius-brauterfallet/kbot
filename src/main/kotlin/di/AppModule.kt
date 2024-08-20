@@ -3,9 +3,16 @@ package di
 import model.KbotConfig
 import model.KbotProperties
 import com.typesafe.config.ConfigFactory
+import commands.HelpCommand
+import commands.InfoCommand
+import commands.LunchCommand
+import commands.PingCommand
 import discord4j.core.DiscordClientBuilder
 import discord4j.core.GatewayDiscordClient
 import discord4j.gateway.intent.IntentSet
+import handlers.CommandHandler
+import handlers.RoleReactionHandler
+import handlers.RoleUpdateHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -16,6 +23,8 @@ import services.GuildRolesService
 import services.GuildRolesServiceImpl
 import services.LunchService
 import services.LunchServiceImpl
+import tasks.AttendanceMessageTask
+import tasks.DailyLunchMessageTask
 import java.util.*
 
 val appModule = module {
@@ -65,4 +74,23 @@ val appModule = module {
     // Services
     singleOf<LunchService>(::LunchServiceImpl)
     singleOf<GuildRolesService>(::GuildRolesServiceImpl)
+
+    // Handlers
+    singleOf(::CommandHandler)
+    singleOf(::RoleReactionHandler)
+    singleOf(::RoleUpdateHandler)
+
+    // Tasks
+    singleOf(::DailyLunchMessageTask)
+    singleOf(::AttendanceMessageTask)
+
+    // Commands
+    single {
+        listOf(
+            HelpCommand,
+            InfoCommand,
+            LunchCommand,
+            PingCommand
+        )
+    }
 }
