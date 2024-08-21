@@ -6,19 +6,17 @@ import discord4j.core.`object`.entity.Guild
 import discord4j.core.`object`.reaction.ReactionEmoji
 import model.KbotConfig
 import model.UserRole
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
 import org.slf4j.Logger
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
-class GuildRolesServiceImpl : GuildRolesService, KoinComponent {
+class GuildRolesServiceImpl(
+    private val client: GatewayDiscordClient,
+    private val config: KbotConfig,
+    private val logger: Logger,
+    private val guild: Guild
+): GuildRolesService {
     private var _roles: List<UserRole> = emptyList()
-
-    private val client: GatewayDiscordClient by inject()
-    private val config: KbotConfig by inject()
-    private val logger: Logger by inject()
-    private val guild: Guild by inject()
 
     private fun updateRolesList(): Mono<Unit> {
         logger.info("Updating guild role list...")

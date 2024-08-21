@@ -1,7 +1,3 @@
-import commands.HelpCommand
-import commands.InfoCommand
-import commands.LunchCommand
-import commands.PingCommand
 import di.appModule
 import discord4j.core.GatewayDiscordClient
 import handlers.CommandHandler

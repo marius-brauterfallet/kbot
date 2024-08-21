@@ -4,11 +4,11 @@ import kotlinx.datetime.*
 import kotlinx.datetime.format.MonthNames
 import kotlinx.datetime.format.char
 import org.jsoup.Jsoup
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
 import org.slf4j.Logger
 
-class LunchServiceImpl : LunchService, KoinComponent {
+class LunchServiceImpl(
+    private val logger: Logger
+) : LunchService {
     companion object {
         private const val MENU_URL =
             "https://widget.inisign.com/Widget/Customers/Customer.aspx?token=c5a641de-e74e-48eb-be4e-d847f261ec11"
@@ -32,7 +32,6 @@ class LunchServiceImpl : LunchService, KoinComponent {
         )
     }
 
-    private val logger: Logger by inject()
 
     override fun getMenus(withDate: Boolean): Result<String> {
         val document = Jsoup.connect(MENU_URL).get()

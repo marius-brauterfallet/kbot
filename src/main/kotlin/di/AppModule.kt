@@ -1,7 +1,5 @@
 package di
 
-import model.KbotConfig
-import model.KbotProperties
 import com.typesafe.config.ConfigFactory
 import commands.HelpCommand
 import commands.InfoCommand
@@ -16,7 +14,10 @@ import handlers.RoleUpdateHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import model.KbotConfig
+import model.KbotProperties
 import org.koin.core.module.dsl.singleOf
+import org.koin.dsl.bind
 import org.koin.dsl.module
 import org.slf4j.LoggerFactory
 import services.GuildRolesService
@@ -32,7 +33,9 @@ val appModule = module {
         val environment = System.getenv("ENV") ?: "default"
 
         val config = when (environment) {
-            "dev" -> ConfigFactory.parseResources("application.dev.conf").withFallback(ConfigFactory.load())
+            "dev" -> ConfigFactory.parseResources("application.dev.conf")
+                .withFallback(ConfigFactory.load())
+
             else -> ConfigFactory.load()
         } ?: throw IllegalStateException("Could not load bot configuration")
 
@@ -62,18 +65,17 @@ val appModule = module {
         val client: GatewayDiscordClient = get()
         val config: KbotConfig = get()
 
-        client.getGuildById(config.guildId).block()
+        client.getGuildById(config.guildId)
+            .block()
             ?: throw IllegalStateException("Something went wrong when retrieving the guild id. Environment variable GUILD_ID might be missing")
     }
 
     single { CoroutineScope(SupervisorJob() + Dispatchers.Default) }
-    single {
-        LoggerFactory.getLogger("kbot") ?: throw Exception("Something went wrong initializing the Logback logger")
-    }
+    single { LoggerFactory.getLogger("kbot") ?: throw Exception("Something went wrong initializing the Logback logger") }
 
     // Services
-    singleOf<LunchService>(::LunchServiceImpl)
-    singleOf<GuildRolesService>(::GuildRolesServiceImpl)
+    singleOf(::LunchServiceImpl) bind LunchService::class
+    singleOf(::GuildRolesServiceImpl) bind GuildRolesService::class
 
     // Handlers
     singleOf(::CommandHandler)
