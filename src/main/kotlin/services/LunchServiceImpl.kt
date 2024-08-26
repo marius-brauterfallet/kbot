@@ -111,8 +111,6 @@ class LunchServiceImpl(
             allergenNumber to allergenText.trim().lowercase()
         }.toMap()
 
-        println(allergensMap)
-
         val completeMenu = dishesAndAllergens.joinToString("\n\n") { (dish, allergens) ->
             val dishAllergens = if (allergens.isNotEmpty()) {
                 "\n*Allergens: ${allergens.joinToString(", ") { allergensMap[it].toString() }}*"
