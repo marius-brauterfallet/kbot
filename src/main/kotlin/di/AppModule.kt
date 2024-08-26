@@ -11,6 +11,8 @@ import discord4j.gateway.intent.IntentSet
 import handlers.CommandHandler
 import handlers.RoleReactionHandler
 import handlers.RoleUpdateHandler
+import io.ktor.client.*
+import io.ktor.client.engine.cio.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -95,4 +97,6 @@ val appModule = module {
             PingCommand
         )
     }
+
+    single { HttpClient(CIO) }
 }

@@ -8,6 +8,7 @@ val jsoup_version: String by project
 
 val kotlinx_datetime_version: String by project
 val koin_version: String by project
+val ktor_version: String by project
 
 
 plugins {
@@ -39,6 +40,8 @@ dependencies {
 
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:$kotlinx_datetime_version")
     implementation("io.insert-koin:koin-core:$koin_version")
+    implementation("io.ktor:ktor-client-core:$ktor_version")
+    implementation("io.ktor:ktor-client-cio:$ktor_version")
 
 }
 
