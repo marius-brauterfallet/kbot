@@ -1,5 +1,12 @@
 package services
 
+import io.ktor.client.*
+import io.ktor.client.request.*
+import io.ktor.client.statement.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.datetime.*
 import kotlinx.datetime.format.MonthNames
 import kotlinx.datetime.format.char
@@ -7,7 +14,9 @@ import org.jsoup.Jsoup
 import org.slf4j.Logger
 
 class LunchServiceImpl(
-    private val logger: Logger
+    private val logger: Logger,
+    private val httpClient: HttpClient,
+    private val coroutineScope: CoroutineScope
 ) : LunchService {
     companion object {
         private const val MENU_URL =
@@ -33,26 +42,32 @@ class LunchServiceImpl(
     }
 
 
-    override fun getMenus(withDate: Boolean): Result<String> {
-        val document = Jsoup.connect(MENU_URL).get()
+    override suspend fun getMenus(withDate: Boolean): Result<String> = coroutineScope {
+        val htmlMenu = httpClient.get(MENU_URL).bodyAsText()
+        val document = Jsoup.parse(htmlMenu)
 
         val menusDiv = document.select("h3").find { it.text().lowercase().contains("todays menu") }?.parent()
-            ?: return Result.failure(Exception())
+            ?: return@coroutineScope Result.failure(Exception())
 
         val kotlinPattern = Regex("\\S+/lnk_(\\S+).jpg")
 
         val menus = menusDiv.select("div.link-item").map { div ->
-            val aElement = div.selectFirst("a") ?: return@map null
-            val imgElement = div.selectFirst("img") ?: return@map null
-            val srcAttribute = imgElement.attribute("src").value
+            async {
+                val aElement = div.selectFirst("a") ?: return@async null
+                val imgElement = div.selectFirst("img") ?: return@async null
+                val srcAttribute = imgElement.attribute("src").value
 
-            val canteenName =
-                kotlinPattern.find(srcAttribute)?.groups?.get(1)?.value?.replace('_', ' ') ?: "Unknown canteen"
+                val canteenName =
+                    kotlinPattern.find(srcAttribute)?.groups?.get(1)?.value?.replace('_', ' ') ?: "Unknown canteen"
 
-            val menu = getMenu(aElement.attribute("href").value).getOrDefault("???")
+                val menu = getMenu(aElement.attribute("href").value).getOrDefault("???")
 
-            "## $canteenName\n$menu"
-        }.joinToString("\n\n").let {
+                "## $canteenName\n$menu"
+            }
+        }
+            .awaitAll()
+            .filterNotNull()
+            .joinToString("\n\n").let {
             if (withDate) {
                 val currentDate = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
                 val dateFormat = LocalDate.Format {
@@ -67,11 +82,12 @@ class LunchServiceImpl(
             } else it
         }
 
-        return Result.success(menus)
+        Result.success(menus)
     }
 
-    private fun getMenu(url: String): Result<String> {
-        val document = Jsoup.connect(url).get()
+    private suspend fun getMenu(url: String): Result<String> {
+        val menuHtml = httpClient.get(url).bodyAsText()
+        val document = Jsoup.parse(menuHtml)
 
         val menuDiv = document.select("h1").find { it.text().lowercase().contains(Regex("today'?s lunch")) }?.parent()
             ?: return Result.failure<String>(Exception("Could not find lunch container"))

@@ -1,5 +1,5 @@
 package services
 
 interface LunchService {
-    fun getMenus(withDate: Boolean): Result<String>
+    suspend fun getMenus(withDate: Boolean): Result<String>
 }
