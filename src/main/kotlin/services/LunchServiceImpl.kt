@@ -99,7 +99,13 @@ class LunchServiceImpl(
                 ?.filter { it != 0 }
                 ?: return@mapNotNull null
 
-            "**$dishName**" to allergenNumbers
+            val emojis = lunchEmojis
+                .filter { dishName.contains(it.first, ignoreCase = true) }
+                .joinToString(" ") { it.second }
+
+            val dishNameWithEmojis = if (emojis.isNotEmpty()) "$dishName $emojis" else dishName
+
+            "**$dishNameWithEmojis**" to allergenNumbers
         }
 
         val allergensText = menuAndAllergens.split(menuItemMatches.last().value).last()
