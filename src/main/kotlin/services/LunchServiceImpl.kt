@@ -86,7 +86,7 @@ class LunchServiceImpl(
 
         val menuAndAllergens = menuText.split(Regex("today'?s lunch", RegexOption.IGNORE_CASE))[1].trim()
 
-        val menuItemPattern = Regex("([\\w &()]+)(allergener|allergens):\\s*([\\d,]*)", RegexOption.IGNORE_CASE)
+        val menuItemPattern = Regex("([\\w &(),]+)(allergener|allergens):\\s*([\\d,]*)", RegexOption.IGNORE_CASE)
         val allergenPattern = Regex("(\\d+) ([a-zøæå /]+)", RegexOption.IGNORE_CASE)
 
         val menuItemMatches = menuItemPattern.findAll(menuAndAllergens)
