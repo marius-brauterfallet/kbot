@@ -18,11 +18,10 @@ class DailyLunchMessageTask(
     private val lunchService: LunchService,
     private val config: KbotConfig,
     private val logger: Logger,
-    private val coroutineScope: CoroutineScope
 ) {
     fun register() {
         scheduleWeekdayTask(applicationScope, LocalTime(9, 0), TimeZone.of("Europe/Oslo")) {
-            val menuMono = mono(coroutineScope.coroutineContext) {
+            val menuMono = mono {
                 lunchService.getMenus(true).getOrElse { exception ->
                     "Could not retrieve today's lunch menus: ${exception.message}".also(logger::error)
                 }
