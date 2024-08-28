@@ -101,6 +101,7 @@ class LunchServiceImpl(
 
             val emojis = lunchEmojis
                 .filter { dishName.contains(it.first, ignoreCase = true) }
+                .sortedBy { (string, _) -> dishName.indexOf(string, ignoreCase = true) }
                 .joinToString(" ") { it.second }
 
             val dishNameWithEmojis = if (emojis.isNotEmpty()) "$dishName $emojis" else dishName
