@@ -9,6 +9,7 @@ val jsoup_version: String by project
 val kotlinx_datetime_version: String by project
 val koin_version: String by project
 val ktor_version: String by project
+val mockk_version: String by project
 
 
 plugins {
@@ -28,6 +29,8 @@ repositories {
 
 dependencies {
     testImplementation(kotlin("test"))
+    testImplementation("io.insert-koin:koin-test:$koin_version")
+    testImplementation("io.mockk:mockk:${mockk_version}")
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinx_coroutines_version")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:$kotlinx_coroutines_version")
@@ -42,7 +45,6 @@ dependencies {
     implementation("io.insert-koin:koin-core:$koin_version")
     implementation("io.ktor:ktor-client-core:$ktor_version")
     implementation("io.ktor:ktor-client-cio:$ktor_version")
-
 }
 
 application {

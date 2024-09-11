@@ -3,18 +3,19 @@ package services
 import io.ktor.client.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.datetime.*
 import kotlinx.datetime.format.MonthNames
 import kotlinx.datetime.format.char
+import model.lunch.MenuItem
 import org.jsoup.Jsoup
+import org.jsoup.nodes.Element
 import org.slf4j.Logger
 
 class LunchServiceImpl(
-    private val logger: Logger, private val httpClient: HttpClient, private val coroutineScope: CoroutineScope
+    private val logger: Logger, private val httpClient: HttpClient
 ) : LunchService {
     companion object {
         private const val MENU_URL =
@@ -35,7 +36,8 @@ class LunchServiceImpl(
             "salmon" to "🐟",
             "stew" to "🍲",
             "sausage" to "🌭",
-            "pizza" to "🍕"
+            "pizza" to "🍕",
+            "chili" to "🌶️"
         )
     }
 
@@ -58,74 +60,96 @@ class LunchServiceImpl(
                 val canteenName =
                     kotlinPattern.find(srcAttribute)?.groups?.get(1)?.value?.replace('_', ' ') ?: "Unknown canteen"
 
-                val menu = getMenu(aElement.attribute("href").value).getOrDefault("???")
+                val menuUrl = aElement.attribute("href").value
+                val menuHtml = httpClient.get(menuUrl).bodyAsText()
 
-                "## $canteenName\n$menu"
+                val menu = getMenu(menuHtml).getOrDefault("???")
+
+                "## [$canteenName]($menuUrl)\n$menu"
             }
         }.awaitAll().filterNotNull().joinToString("\n\n").let {
-                if (withDate) {
-                    val currentDate = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
-                    val dateFormat = LocalDate.Format {
-                        dayOfMonth()
-                        chars(". ")
-                        monthName(MonthNames.ENGLISH_FULL)
-                        char(' ')
-                        year()
-                    }
+            if (withDate) {
+                val currentDate = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
+                val dateFormat = LocalDate.Format {
+                    dayOfMonth()
+                    chars(". ")
+                    monthName(MonthNames.ENGLISH_FULL)
+                    char(' ')
+                    year()
+                }
 
-                    "# Lunch menu ${currentDate.format(dateFormat)}\n$it"
-                } else it
-            }
+                "# Lunch menu ${currentDate.format(dateFormat)}\n$it"
+            } else it
+        }
 
         Result.success(menus)
     }
 
-    private suspend fun getMenu(url: String): Result<String> {
-        val menuHtml = httpClient.get(url).bodyAsText()
-        val menuText = Jsoup.parse(menuHtml).text()
-
-        val menuAndAllergens = menuText.split(Regex("today'?s lunch", RegexOption.IGNORE_CASE))[1].trim()
-
-        val menuItemPattern = Regex("([\\wøæå &(),]+)(allergener|allergens):\\s*([\\d,]*)", RegexOption.IGNORE_CASE)
-        val allergenPattern = Regex("(\\d+) ([a-zøæå /]+)", RegexOption.IGNORE_CASE)
-
-        val menuItemMatches = menuItemPattern.findAll(menuAndAllergens)
-
-        val dishesAndAllergens = menuItemMatches.mapNotNull { match ->
-            val dishName = match.groups[1]?.value?.trim() ?: return@mapNotNull null
-            val allergenNumbers = match.groups[3]?.value
-                ?.split(",")
-                ?.mapNotNull { it.toIntOrNull() }
-                ?.filter { it != 0 }
-                ?: return@mapNotNull null
-
+    private fun getMenu(menuHtml: String): Result<String> {
+        val menuItems = parseMenu(menuHtml).getOrElse { return Result.failure(it) }
+        val dishesAndAllergens = menuItems.map { menuItem ->
             val emojis = lunchEmojis
-                .filter { dishName.contains(it.first, ignoreCase = true) }
-                .sortedBy { (string, _) -> dishName.indexOf(string, ignoreCase = true) }
+                .filter { (ingredientName, _) -> menuItem.description.contains(ingredientName, ignoreCase = true) }
+                .sortedBy { (string, _) -> menuItem.description.indexOf(string, ignoreCase = true) }
                 .joinToString(" ") { it.second }
 
-            val dishNameWithEmojis = if (emojis.isNotEmpty()) "$dishName $emojis" else dishName
+            val dishNameWithEmojis = if (emojis.isNotEmpty()) "${menuItem.description} $emojis" else menuItem.description
 
-            "**$dishNameWithEmojis**" to allergenNumbers
+            "**$dishNameWithEmojis**" to menuItem.allergens
         }
 
-        val allergensText = menuAndAllergens.split(menuItemMatches.last().value).last()
-
-        val allergensMap = allergenPattern.findAll(allergensText).mapNotNull { match ->
-            val allergenNumber = match.groups[1]?.value?.toIntOrNull() ?: return@mapNotNull null
-            val allergenText = match.groups[2]?.value?.split("/")?.last() ?: return@mapNotNull null
-
-            allergenNumber to allergenText.trim().lowercase()
-        }.toMap()
 
         val completeMenu = dishesAndAllergens.joinToString("\n\n") { (dish, allergens) ->
             val dishAllergens = if (allergens.isNotEmpty()) {
-                "\n*Allergens: ${allergens.joinToString(", ") { allergensMap[it].toString() }}*"
+                "\n*Allergens: ${allergens.joinToString(", ")}*"
             } else ""
 
             dish + dishAllergens
         }
 
         return Result.success(completeMenu)
+    }
+
+    override fun parseMenu(menuHtml: String): Result<List<MenuItem>> {
+        val allergenMap = parseAllergens(menuHtml)
+
+        val htmlDocument = Jsoup.parse(menuHtml)
+
+        val menuItems = htmlDocument.descendants()
+            .asSequence()
+            .dropWhile { !it.ownText().contains(Regex("TODAY'?S LUNCH", RegexOption.IGNORE_CASE)) }
+            .drop(1)
+            .takeWhile { it.className() != "allergen-holder" }
+            .filter { it.ownText().isNotEmpty() }
+            .zipWithNext { a, b -> a.ownText() to b.ownText() }
+            .filter { !it.first.contains(Regex("(Allergener|Allergens):", RegexOption.IGNORE_CASE)) }
+            .map { (itemDescription, allergenText) ->
+                val allergens = allergenText.split(":").last().split(",").mapNotNull {
+                    val allergenNumber = it.trim().toIntOrNull() ?: return@mapNotNull null
+                    allergenMap[allergenNumber]
+                }
+
+                MenuItem(itemDescription, allergens)
+            }
+            .toList()
+
+        return Result.success(menuItems)
+    }
+
+    private fun Element.descendants(): List<Element> {
+        return listOf(this) + children().flatMap { it.descendants() }
+    }
+
+    private fun parseAllergens(menuHtml: String): Map<Int, String> {
+        val htmlDocument = Jsoup.parse(menuHtml)
+        val allergenHolder = htmlDocument.select(".allergen-holder")
+
+        return allergenHolder.select("td").mapNotNull { allergenCell ->
+            val allergenNumber =
+                allergenCell.select(".allergen-item-number").text().toIntOrNull() ?: return@mapNotNull null
+            val allergenName = allergenCell.select(".allergen-item-name").text().split("/").last()
+
+            allergenNumber to allergenName
+        }.toMap()
     }
 }
