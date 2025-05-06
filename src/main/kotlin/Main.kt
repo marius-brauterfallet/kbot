@@ -10,7 +10,6 @@ import org.koin.core.context.startKoin
 import org.slf4j.Logger
 import services.GuildRolesService
 import tasks.AttendanceMessageTask
-import tasks.DailyLunchMessageTask
 
 fun main() {
     startKoin {
@@ -30,7 +29,6 @@ class KbotApp : KoinComponent {
     private val roleReactionHandler: RoleReactionHandler by inject()
     private val commandHandler: CommandHandler by inject()
 
-    private val dailyLunchMessageTask: DailyLunchMessageTask by inject()
     private val attendanceMessageTask: AttendanceMessageTask by inject()
 
     fun start() {
@@ -51,7 +49,6 @@ class KbotApp : KoinComponent {
     }
 
     private fun registerScheduledTasks() {
-        dailyLunchMessageTask.register()
         attendanceMessageTask.register()
     }
 }
